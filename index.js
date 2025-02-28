@@ -2,6 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const pool = require('./db');
 
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -14,8 +18,8 @@ app.get('/', (req, res) => {
 
 app.get('/users', async (req, res) => {
     try {
-      const result = await pool.query('SELECT * FROM users');
-      res.json(result.rows);
+      const users = await prisma.user.findMany();
+      res.json(users);
     } catch (error) {
       console.error('Database query error:', error);
       res.status(500).json({ error: 'Internal Server Error' });
