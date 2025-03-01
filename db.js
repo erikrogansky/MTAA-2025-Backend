@@ -1,4 +1,6 @@
 const { Pool } = require('pg');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 // Environment variables for flexibility
 const DB_HOST = process.env.DB_HOST || 'localhost'; // Default to localhost
@@ -18,3 +20,4 @@ const pool = new Pool({
 });
 
 module.exports = pool;
+module.exports = prisma;

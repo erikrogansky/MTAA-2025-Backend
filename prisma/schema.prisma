@@ -8,9 +8,34 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  name  String
-  email String @unique
-  password String
-  preferences String[]
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  password      String
+  preferences   String[]
+  refreshToken  String?
+  oauthProvider String?  // e.g., 'google', 'facebook'
+  oauthId       String?  @unique // The provider's user ID
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions      Session[]
+  devices       Device[]
+}
+
+model Session {
+  id          String   @id @default(uuid())
+  userId      Int      @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String  @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Device {
+  id        String   @id @default(uuid())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId  String   @unique // Unique identifier for the device
+  createdAt DateTime @default(now())
 }
