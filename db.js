@@ -19,5 +19,4 @@ const pool = new Pool({
   ssl: DB_HOST !== 'localhost' ? { rejectUnauthorized: false } : false, // Enable SSL for remote connections
 });
 
-module.exports = pool;
-module.exports = prisma;
+module.exports = { pool, prisma };
