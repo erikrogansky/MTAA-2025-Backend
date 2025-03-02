@@ -149,14 +149,20 @@ const logout = async (req, res) => {
             return res.status(400).json({ message: "Refresh token and device ID required" });
         }
 
-        // Delete the session (invalidate refresh token)
+        const session = await prisma.session.findFirst({
+            where: { deviceId, refreshToken },
+        });
+
+        if (!session) {
+            return res.status(401).json({ message: "Invalid or expired refresh token" });
+        }
+
         await prisma.session.deleteMany({ where: { deviceId, refreshToken } });
 
-        // Blacklist access token in Redis
         if (authHeader && authHeader.startsWith("Bearer ")) {
             const accessToken = authHeader.split(" ")[1];
-            const expiry = process.env.ACCESS_TOKEN_EXPIRY || "15m"; // Default expiry 15 min
-            const expirySeconds = parseInt(expiry) * 60; // Convert to seconds
+            const expiry = process.env.ACCESS_TOKEN_EXPIRY || "15m";
+            const expirySeconds = parseInt(expiry) * 60;
             await redis.setex(`blacklist:${accessToken}`, expirySeconds, "blacklisted");
         }
 
