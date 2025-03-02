@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const usersRoutes = require("./routes/users");
 const aiRoutes = require("./routes/ai");
+const authRoutes = require("./routes/auth");
 const errorHandler = require("./middleware/errorHandler");
 const authMiddleware = require("./middleware/authMiddleware");
 
@@ -14,6 +15,8 @@ app.use(errorHandler);
 app.get("/", (req, res) => {
     res.json({ message: "Hello, Node.js Server!" });
 });
+
+app.use("/auth", authRoutes);
 
 app.use("/users", authMiddleware, usersRoutes);
 app.use("/ai", authMiddleware, aiRoutes)

@@ -9,21 +9,17 @@ const authMiddleware = async (req, res, next) => {
         }
 
         const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-        const session = await prisma.session.findUnique({
-            where: { userId: decoded.userId },
-            include: { user: true }
-        });
-
-        if (!session || session.refreshToken !== token || new Date(session.expiresAt) < new Date()) {
-            return res.status(401).json({ message: "Unauthorized: Invalid session" });
+        const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized: User not found" });
         }
 
-        req.user = session.user;
+        req.user = user;
         next();
     } catch (error) {
-        return res.status(401).json({ message: "Unauthorized: Invalid token" });
+        return res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
     }
 };
 
