@@ -12,6 +12,26 @@ const generateTokens = (userId) => {
 const register = async (req, res) => {
     try {
         const { name, email, password, preferences, deviceId } = req.body;
+
+        if (!name) return res.status(400).json({ message: "Name required" });
+        if (!email) return res.status(400).json({ message: "Email required" });
+        if (!password) return res.status(400).json({ message: "Password required" });
+
+        name = name.trim();
+        email = email.trim();
+        password = password.trim();
+
+        if (name.length < 2) return res.status(400).json({ message: "Name must be at least 2 characters" });
+        if (email.length < 6) return res.status(400).json({ message: "Email must be at least 6 characters" });
+        if (email && !email.includes("@")) return res.status(400).json({ message: "Invalid email" });
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) return res.status(400).json({ message: "Invalid email format" });
+        if (password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters"});
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({ message: "Password must be at least 6 characters, including letters and numbers" });
+        }
+
         if (!deviceId) return res.status(400).json({ message: "Device ID required" });
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
