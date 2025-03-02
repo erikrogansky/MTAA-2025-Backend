@@ -16,10 +16,7 @@ const register = async (req, res) => {
         if (!name) return res.status(400).json({ message: "Name required" });
         if (!email) return res.status(400).json({ message: "Email required" });
         if (!password) return res.status(400).json({ message: "Password required" });
-
-        name = name.trim();
-        email = email.trim();
-        password = password.trim();
+        if (!deviceId) return res.status(400).json({ message: "Device ID required" });
 
         if (name.length < 2) return res.status(400).json({ message: "Name must be at least 2 characters" });
         if (email.length < 6) return res.status(400).json({ message: "Email must be at least 6 characters" });
@@ -31,8 +28,6 @@ const register = async (req, res) => {
         if (!passwordRegex.test(password)) {
             return res.status(400).json({ message: "Password must be at least 6 characters, including letters and numbers" });
         }
-
-        if (!deviceId) return res.status(400).json({ message: "Device ID required" });
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) return res.status(400).json({ message: "Email already in use" });
