@@ -1,4 +1,4 @@
-const { prisma } = require('../db');
+const { prisma, redis } = require('../db');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -11,7 +11,8 @@ const generateTokens = (userId) => {
 
 const register = async (req, res) => {
     try {
-        const { name, email, password, preferences } = req.body;
+        const { name, email, password, preferences, deviceId } = req.body;
+        if (!deviceId) return res.status(400).json({ message: "Device ID required" });
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) return res.status(400).json({ message: "Email already in use" });
@@ -27,11 +28,21 @@ const register = async (req, res) => {
             },
         });
 
+        // Generate tokens
         const { accessToken, refreshToken } = generateTokens(user.id);
 
+        // Create device if not exists
+        await prisma.device.upsert({
+            where: { deviceId },
+            update: {},
+            create: { userId: user.id, deviceId },
+        });
+
+        // Create session
         await prisma.session.create({
             data: {
                 userId: user.id,
+                deviceId,
                 refreshToken,
                 expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
             },
@@ -44,9 +55,11 @@ const register = async (req, res) => {
     }
 };
 
+
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, deviceId } = req.body;
+        if (!deviceId) return res.status(400).json({ message: "Device ID required" });
 
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) return res.status(400).json({ message: "Invalid credentials" });
@@ -56,10 +69,18 @@ const login = async (req, res) => {
 
         const { accessToken, refreshToken } = generateTokens(user.id);
 
+        // Create or update device
+        await prisma.device.upsert({
+            where: { deviceId },
+            update: {},
+            create: { userId: user.id, deviceId },
+        });
+
+        // Create or update session per device
         await prisma.session.upsert({
-            where: { userId: user.id },
+            where: { deviceId },
             update: { refreshToken, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
-            create: { userId: user.id, refreshToken, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
+            create: { userId: user.id, deviceId, refreshToken, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
         });
 
         res.json({ accessToken, refreshToken });
@@ -69,16 +90,29 @@ const login = async (req, res) => {
     }
 };
 
+
 const refreshAccessToken = async (req, res) => {
     try {
-        const { refreshToken } = req.body;
-        if (!refreshToken) return res.status(401).json({ message: "Refresh token required" });
+        const { refreshToken, deviceId } = req.body;
+        const authHeader = req.headers.authorization;
 
-        const session = await prisma.session.findUnique({ where: { refreshToken } });
-        if (!session) return res.status(403).json({ message: "Invalid refresh token" });
+        if (!refreshToken || !deviceId) {
+            return res.status(401).json({ message: "Refresh token and device ID required" });
+        }
+
+        const session = await prisma.session.findUnique({ where: { deviceId, refreshToken } });
+        if (!session) return res.status(403).json({ message: "Invalid refresh token or device" });
 
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
             if (err) return res.status(403).json({ message: "Invalid refresh token" });
+
+            if (authHeader && authHeader.startsWith("Bearer ")) {
+                const oldAccessToken = authHeader.split(" ")[1];
+                const expiry = process.env.ACCESS_TOKEN_EXPIRY || "15m";
+                const expirySeconds = parseInt(expiry) * 60;
+
+                await redis.setex(`blacklist:${oldAccessToken}`, expirySeconds, "blacklisted");
+            }
 
             const newAccessToken = jwt.sign({ userId: decoded.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
 
@@ -90,18 +124,71 @@ const refreshAccessToken = async (req, res) => {
     }
 };
 
+
 const logout = async (req, res) => {
     try {
-        const { refreshToken } = req.body;
-        if (!refreshToken) return res.status(400).json({ message: "Refresh token required" });
+        const { refreshToken, deviceId } = req.body;
+        const authHeader = req.headers.authorization;
 
-        await prisma.session.deleteMany({ where: { refreshToken } });
+        if (!refreshToken || !deviceId) {
+            return res.status(400).json({ message: "Refresh token and device ID required" });
+        }
 
-        res.json({ message: "Logged out" });
+        // Delete the session (invalidate refresh token)
+        await prisma.session.deleteMany({ where: { deviceId, refreshToken } });
+
+        // Blacklist access token in Redis
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            const accessToken = authHeader.split(" ")[1];
+            const expiry = process.env.ACCESS_TOKEN_EXPIRY || "15m"; // Default expiry 15 min
+            const expirySeconds = parseInt(expiry) * 60; // Convert to seconds
+            await redis.setex(`blacklist:${accessToken}`, expirySeconds, "blacklisted");
+        }
+
+        res.json({ message: "Logged out from this device" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
     }
 };
 
-module.exports = { register, login, refreshAccessToken, logout };
+
+
+const logoutAll = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        const authHeader = req.headers.authorization;
+
+        if (!refreshToken) {
+            return res.status(400).json({ message: "Refresh token required" });
+        }
+
+        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
+            if (err) return res.status(403).json({ message: "Invalid refresh token" });
+
+            const userId = decoded.userId;
+
+            const sessions = await prisma.session.findMany({ where: { userId } });
+
+            if (!sessions.length) {
+                return res.status(400).json({ message: "No active sessions found" });
+            }
+
+            await prisma.session.deleteMany({ where: { userId } });
+
+            if (authHeader && authHeader.startsWith("Bearer ")) {
+                const accessToken = authHeader.split(" ")[1];
+                const expiry = process.env.ACCESS_TOKEN_EXPIRY || "15m";
+                const expirySeconds = parseInt(expiry) * 60;
+                await redis.setex(`blacklist:${accessToken}`, expirySeconds, "blacklisted");
+            }
+
+            res.json({ message: "Logged out from all devices" });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+module.exports = { register, login, refreshAccessToken, logout, logoutAll };
