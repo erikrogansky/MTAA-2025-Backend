@@ -5,7 +5,6 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "preferences" TEXT[],
-    "refreshToken" TEXT,
     "oauthProvider" TEXT,
     "oauthId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

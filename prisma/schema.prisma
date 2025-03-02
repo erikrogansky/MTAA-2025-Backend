@@ -13,7 +13,7 @@ model User {
   email         String   @unique
   password      String
   preferences   String[]
-  refreshToken  String?
+  //refreshToken  String?
   oauthProvider String? // e.g., 'google', 'facebook'
   oauthId       String?  @unique // The provider's user ID
   createdAt     DateTime @default(now())
