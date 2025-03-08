@@ -6,7 +6,8 @@ function initializeWebSocket(server) {
     const wss = new WebSocket.Server({ server });
 
     wss.on("connection", (ws, req) => {
-        const params = new URLSearchParams(req.url.split("?")[1]);
+        const url = req?.url ?? "";
+        const params = new URLSearchParams(url.includes("?") ? url.split("?")[1] : "");
         const token = params.get("token");
     
         if (!token) {
@@ -15,6 +16,8 @@ function initializeWebSocket(server) {
             ws.close();
             return;
         }
+
+        console.log("Token: ", token)
     
         try {
             const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
