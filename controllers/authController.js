@@ -158,6 +158,7 @@ const logout = async (req, res) => {
         }
 
         await prisma.session.deleteMany({ where: { deviceId, refreshToken } });
+        await prisma.device.deleteMany({ where: { deviceId } });
 
         if (authHeader && authHeader.startsWith("Bearer ")) {
             const accessToken = authHeader.split(" ")[1];
@@ -196,6 +197,7 @@ const logoutAll = async (req, res) => {
             }
 
             await prisma.session.deleteMany({ where: { userId } });
+            await prisma.device.deleteMany({ where: { userId } });
 
             if (authHeader && authHeader.startsWith("Bearer ")) {
                 const accessToken = authHeader.split(" ")[1];
