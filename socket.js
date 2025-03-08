@@ -28,7 +28,7 @@ function initializeWebSocket(server) {
                     return;
                 }
     
-                const userId = decoded.user_id;
+                const userId = decoded.userId;
                 if (!userId) {
                     console.error("❌ Token does not contain 'user_id'. Received payload:", decoded);
                     ws.send(JSON.stringify({ type: "error", message: "Invalid token structure" }));
