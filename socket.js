@@ -9,9 +9,18 @@ function initializeWebSocket(server) {
         const params = new URLSearchParams(req.url.split("?")[1]);
         const token = params.get("token");
     
+        if (!token) {
+            ws.send(JSON.stringify({ type: "error", message: "Missing token" }));
+            console.error("WebSocket Connection closed: Missing token");
+            ws.close();
+            return;
+        }
+    
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             const userId = decoded.user_id;
+    
+            console.log(`User ${userId} connected to WebSocket`);
     
             if (!userSockets.has(userId)) {
                 userSockets.set(userId, new Set());
@@ -21,17 +30,20 @@ function initializeWebSocket(server) {
             const { handleMessage } = require("./socket-manager");
     
             ws.on("message", (message) => {
+                console.log(`Received message from ${userId}: ${message}`);
                 handleMessage(userId, message, ws);
             });
     
-            ws.on("close", () => {
-                userSockets.get(userId).delete(ws);
-                if (userSockets.get(userId).size === 0) {
+            ws.on("close", (code, reason) => {
+                console.log(`WebSocket closed for user ${userId}. Code: ${code}, Reason: ${reason}`);
+                userSockets.get(userId)?.delete(ws);
+                if (userSockets.get(userId)?.size === 0) {
                     userSockets.delete(userId);
                 }
             });
     
         } catch (error) {
+            console.error("WebSocket Connection closed: Invalid or expired token", error);
             ws.send(JSON.stringify({ type: "error", message: "Invalid or expired token" }));
             ws.close();
         }
