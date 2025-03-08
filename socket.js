@@ -17,7 +17,7 @@ function initializeWebSocket(server) {
         }
     
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
             const userId = decoded.user_id;
     
             console.log(`User ${userId} connected to WebSocket`);
