@@ -5,10 +5,10 @@ const aiRoutes = require("./routes/ai");
 const authRoutes = require("./routes/auth");
 const errorHandler = require("./middleware/errorHandler");
 const authMiddleware = require("./middleware/authMiddleware");
+const { initializeWebSocket } = require("./socket");
 
-const app = express();
 const PORT = process.env.PORT || 3000;
-
+const app = express();
 
 app.use(express.json());
 app.use(errorHandler);
@@ -22,6 +22,9 @@ app.use("/auth", authRoutes);
 app.use("/users", authMiddleware, usersRoutes);
 app.use("/ai", authMiddleware, aiRoutes)
 
-app.listen(PORT, "0.0.0.0", () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+initializeWebSocket(server);

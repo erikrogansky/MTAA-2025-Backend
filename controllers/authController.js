@@ -2,6 +2,8 @@ const { prisma, redis } = require('../db');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const { sendMessageToUser } = require("../socket-manager");
+
 const generateTokens = (userId) => {
     const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
     const refreshToken = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY });
@@ -205,6 +207,8 @@ const logoutAll = async (req, res) => {
                 const expirySeconds = parseInt(expiry) * 60;
                 await redis.setex(`blacklist:${accessToken}`, expirySeconds, "blacklisted");
             }
+
+            sendMessageToUser(userId, { type: "force_logout", message: "You have been logged out from all devices." });
 
             res.json({ message: "Logged out from all devices" });
         });
