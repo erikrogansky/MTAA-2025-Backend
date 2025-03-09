@@ -7,27 +7,23 @@ if (!admin.apps.length) {
 }
 
 const sendPushNotification = async (tokens, title, body) => {
-    if (!tokens || tokens.length === 0) return;
+    if (!tokens || tokens.length === 0) {
+        return;
+    }
 
     const message = {
+        notification: { title, body },
         tokens,
-        notification: {
-            title,
-            body,
-        },
-        android: {
-            priority: "high",
-        },
-        apns: {
-            payload: {
-                aps: { sound: "default" },
-            },
-        },
+        android: { priority: "high" },
+        apns: { payload: { aps: { sound: "default" } } },
     };
 
     try {
-        const response = await admin.messaging().sendMulticast(message);
-        console.log(`Sent notification: ${response.successCount} successful, ${response.failureCount} failed`);
+        const response = await admin.messaging().sendEachForMulticast(message);
+
+        if (response.failureCount > 0) {
+            console.error("Some tokens failed:", response.responses.filter(r => !r.success));
+        }
     } catch (error) {
         console.error("Error sending push notification:", error);
     }
