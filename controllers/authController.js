@@ -1,6 +1,8 @@
 const { prisma, redis } = require('../db');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { sendPushNotification } = require("../utils/firebaseHelper");
+
 
 const { sendMessageToUser } = require("../socket-manager");
 
@@ -75,7 +77,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password, deviceId } = req.body;
+        const { email, password, deviceId, firebaseToken } = req.body;
         if (!deviceId) return res.status(400).json({ message: "Device ID required" });
 
         const user = await prisma.user.findUnique({ where: { email } });
@@ -86,14 +88,29 @@ const login = async (req, res) => {
 
         const { accessToken, refreshToken } = generateTokens(user.id);
 
-        // Create or update device
-        await prisma.device.upsert({
-            where: { deviceId },
-            update: {},
-            create: { userId: user.id, deviceId },
+        const userDevices = await prisma.device.findMany({
+            where: { userId: user.id, NOT: { deviceId } },
+            select: { firebaseToken: true },
         });
 
-        // Create or update session per device
+        const tokens = userDevices
+            .map(d => d.firebaseToken)
+            .filter(token => token && token !== firebaseToken);
+
+        if (tokens.length > 0) {
+            sendPushNotification(
+                tokens,
+                "New Login Detected",
+                "Your account was accessed from a new device."
+            );
+        }
+
+        await prisma.device.upsert({
+            where: { deviceId },
+            update: { firebaseToken, userId: user.id },
+            create: { userId: user.id, deviceId, firebaseToken },
+        });
+
         await prisma.session.upsert({
             where: { deviceId },
             update: { refreshToken, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },

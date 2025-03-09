@@ -39,7 +39,10 @@ model Device {
   id        String    @id @default(uuid())
   userId    Int
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deviceId  String    @unique // Unique identifier for the device
+  deviceId  String    @unique
+  firebaseToken String?
   createdAt DateTime  @default(now())
+
   Session   Session[]
 }
+
