@@ -2,9 +2,14 @@ const { prisma, redis } = require('../db');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendPushNotification } = require("../utils/firebaseHelper");
-
-
+const admin = require("firebase-admin");
 const { sendMessageToUser } = require("../socket-manager");
+
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(require("../mtaa-95655-firebase-adminsdk-fbsvc-9aba7815aa.json")),
+    });
+}
 
 const generateTokens = (userId) => {
     const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
@@ -47,17 +52,14 @@ const register = async (req, res) => {
             },
         });
 
-        // Generate tokens
         const { accessToken, refreshToken } = generateTokens(user.id);
 
-        // Create device if not exists
         await prisma.device.upsert({
             where: { deviceId },
             update: {},
             create: { userId: user.id, deviceId },
         });
 
-        // Create session
         await prisma.session.create({
             data: {
                 userId: user.id,
@@ -120,6 +122,108 @@ const login = async (req, res) => {
         res.json({ accessToken, refreshToken });
     } catch (error) {
         console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+const downloadProfilePicture = async (imageUrl, userId) => {
+    try {
+        const profileDir = path.join(__dirname, "../profile_pictures");
+        if (!fs.existsSync(profileDir)) {
+            fs.mkdirSync(profileDir, { recursive: true });
+        }
+
+        const filePath = path.join(profileDir, `${userId}.jpg`);
+        const response = await axios({ url: imageUrl, responseType: "stream" });
+        const writer = fs.createWriteStream(filePath);
+
+        response.data.pipe(writer);
+
+        return new Promise((resolve, reject) => {
+            writer.on("finish", () => resolve(filePath));
+            writer.on("error", reject);
+        });
+    } catch (error) {
+        console.error("Error downloading profile picture:", error);
+        return null;
+    }
+};
+
+const oauthLogin = async (req, res) => {
+    try {
+        const { idToken, deviceId, firebaseToken, provider } = req.body;
+        if (!idToken) return res.status(400).json({ message: "ID Token is required" });
+        if (!deviceId) return res.status(400).json({ message: "Device ID is required" });
+        if (!provider) return res.status(400).json({ message: "OAuth provider is required" });
+
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        if (!decodedToken || !decodedToken.email) {
+            return res.status(401).json({ message: "Invalid ID Token" });
+        }
+
+        const { email, name, picture, uid } = decodedToken;
+
+        let user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) {
+            const profilePath = picture ? await downloadProfilePicture(picture, uid) : null;
+
+            user = await prisma.user.create({
+                data: {
+                    name: name || "User",
+                    email,
+                    password: null,
+                    profilePicture: profilePath,
+                },
+            });
+        }
+
+        const existingOAuth = await prisma.oAuthAccount.findFirst({
+            where: { provider, providerId: uid },
+        });
+
+        if (!existingOAuth) {
+            await prisma.oAuthAccount.create({
+                data: {
+                    userId: user.id,
+                    provider,
+                    providerId: uid,
+                },
+            });
+        }
+
+        const { accessToken, refreshToken } = generateTokens(user.id);
+
+        const userDevices = await prisma.device.findMany({
+            where: { userId: user.id, NOT: { deviceId } },
+            select: { firebaseToken: true },
+        });
+
+        const tokens = userDevices.map(d => d.firebaseToken).filter(token => token && token !== firebaseToken);
+        if (tokens.length > 0) {
+            sendPushNotification(
+                tokens,
+                "New Login Detected",
+                "Your account was accessed from a new device."
+            );
+        }
+
+        await prisma.device.upsert({
+            where: { deviceId },
+            update: { firebaseToken, userId: user.id },
+            create: { userId: user.id, deviceId, firebaseToken },
+        });
+
+        await prisma.session.upsert({
+            where: { deviceId },
+            update: { refreshToken, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
+            create: { userId: user.id, deviceId, refreshToken, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
+        });
+
+        res.json({ accessToken, refreshToken });
+    } catch (error) {
+        console.error("OAuth Login Error:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -235,4 +339,4 @@ const logoutAll = async (req, res) => {
     }
 };
 
-module.exports = { register, login, refreshAccessToken, logout, logoutAll };
+module.exports = { register, login, oauthLogin, refreshAccessToken, logout, logoutAll };

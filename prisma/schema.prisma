@@ -8,19 +8,28 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  name          String
-  email         String   @unique
-  password      String
-  preferences   String[]
-  //refreshToken  String?
-  oauthProvider String? // e.g., 'google', 'facebook'
-  oauthId       String?  @unique // The provider's user ID
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  name           String
+  email          String   @unique
+  password       String?
+  profilePicture String? // ✅ Stores local file path
+  preferences    String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  sessions Session[]
-  devices  Device[]
+  oauthAccounts OAuthAccount[]
+  sessions      Session[]
+  devices       Device[]
+}
+
+model OAuthAccount {
+  id         Int    @id @default(autoincrement())
+  userId     Int
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   String
+  providerId String
+
+  @@unique([provider, providerId])
 }
 
 model Session {
@@ -36,13 +45,12 @@ model Session {
 }
 
 model Device {
-  id        String    @id @default(uuid())
-  userId    Int
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deviceId  String    @unique
+  id            String   @id @default(uuid())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId      String   @unique
   firebaseToken String?
-  createdAt DateTime  @default(now())
+  createdAt     DateTime @default(now())
 
-  Session   Session[]
+  Session Session[]
 }
-
