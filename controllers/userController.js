@@ -49,7 +49,7 @@ const getUserData = async (req, res) => {
 };
 
 const updateMode = async (req, res) => {
-    const mode = req.body.mode;
+    const { mode } = req.body;
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
