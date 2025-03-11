@@ -48,4 +48,40 @@ const getUserData = async (req, res) => {
     }
 };
 
-module.exports = { getUserData };
+const updateMode = async (req, res) => {
+    const mode = req.body.mode;
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "Authorization token required" });
+    }
+
+    const accessToken = authHeader.split(" ")[1];
+
+    let decoded;
+    try {
+        decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    } catch (error) {
+        return res.status(403).json({ message: "Invalid or expired access token" });
+    }
+
+    const userId = decoded.userId;
+    if (!userId) {
+        return res.status(401).json({ message: "Invalid token payload" });
+    }
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: { darkMode: mode },
+        });
+
+        res.json({ message: "Dark mode updated" });
+    } catch (error) {
+        console.error("Error updating dark mode:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+
+}
+
+module.exports = { getUserData, updateMode };
