@@ -7,12 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum DarkMode {
+  y
+  n
+  s
+}
+
+
 model User {
   id             Int      @id @default(autoincrement())
   name           String
   email          String   @unique
   password       String?
-  profilePicture String? // ✅ Stores local file path
+  profilePicture String?
+  darkMode       DarkMode @default(s) 
   preferences    String[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
