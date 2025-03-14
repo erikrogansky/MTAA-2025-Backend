@@ -49,7 +49,7 @@ const getUserData = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    const { name, profilePicture, darkMode, preferences } = req.body;
+    const { name, profilePicture, mode, preferences } = req.body;
 
     if (!name && !profilePicture && !darkMode && !preferences) {
         return res.status(400).json({ message: "No valid fields provided for update" });
@@ -79,12 +79,12 @@ const updateUser = async (req, res) => {
 
         if (name !== undefined) updateData.name = name;
         if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
-        if (darkMode !== undefined) {
+        if (mode !== undefined) {
             const validDarkModes = ["y", "n", "s"];
             if (!validDarkModes.includes(darkMode)) {
                 return res.status(400).json({ message: "Invalid darkMode value. Allowed: y, n, s" });
             }
-            updateData.darkMode = darkMode;
+            updateData.darkMode = mode;
         }
         if (Array.isArray(preferences)) updateData.preferences = preferences;
 

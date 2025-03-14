@@ -5,5 +5,6 @@ const router = express.Router();
 
 router.get('/get-data', getUserData);
 router.post('/update', updateUser);
+//router.post('/change-passwrod', changePassword);
 
 module.exports = router;
