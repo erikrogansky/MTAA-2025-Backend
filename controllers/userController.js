@@ -2,7 +2,17 @@ const { prisma } = require('../db');
 
 const getUserData = async (req, res) => {
     try {
-        const user = req.user;
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id },
+            include: {
+                oauthAccounts: true,
+            },
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
 
         const userData = {
             name: user.name,
