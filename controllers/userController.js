@@ -3,35 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const getUserData = async (req, res) => {
     try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ message: "Authorization token required" });
-        }
-
-        const accessToken = authHeader.split(" ")[1];
-
-        let decoded;
-        try {
-            decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-        } catch (error) {
-            return res.status(403).json({ message: "Invalid or expired access token" });
-        }
-
-        const userId = decoded.userId;
-        if (!userId) {
-            return res.status(401).json({ message: "Invalid token payload" });
-        }
-
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            include: {
-                oauthAccounts: true, // Fetch linked OAuth accounts
-            },
-        });
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        const user = req.user;
 
         const userData = {
             name: user.name,
@@ -50,28 +22,10 @@ const getUserData = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const { name, profilePicture, mode, preferences } = req.body;
+    const userId = req.user.id; 
 
-    if (!name && !profilePicture && !darkMode && !preferences) {
+    if (!name && !profilePicture && !mode && !preferences) {
         return res.status(400).json({ message: "No valid fields provided for update" });
-    }
-
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Authorization token required" });
-    }
-
-    const accessToken = authHeader.split(" ")[1];
-
-    let decoded;
-    try {
-        decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-    } catch (error) {
-        return res.status(403).json({ message: "Invalid or expired access token" });
-    }
-
-    const userId = decoded.userId;
-    if (!userId) {
-        return res.status(401).json({ message: "Invalid token payload" });
     }
 
     try {
@@ -81,8 +35,8 @@ const updateUser = async (req, res) => {
         if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
         if (mode !== undefined) {
             const validDarkModes = ["y", "n", "s"];
-            if (!validDarkModes.includes(darkMode)) {
-                return res.status(400).json({ message: "Invalid darkMode value. Allowed: y, n, s" });
+            if (!validDarkModes.includes(mode)) {
+                return res.status(400).json({ message: "Invalid mode value. Allowed: y, n, s" });
             }
             updateData.darkMode = mode;
         }
@@ -100,4 +54,53 @@ const updateUser = async (req, res) => {
     }
 };
 
-module.exports = { getUserData, updateUser };
+
+const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const user = req.user;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current and new password required" });
+    }
+
+    try {
+        if (!user.password) {
+            return res.status(400).json({ message: "User has no password set" });
+        }
+
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ message: "Current password is incorrect" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { password: hashedPassword },
+        });
+
+        res.json({ message: "Password updated" });
+    } catch (error) {
+        console.error("Error updating password:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+const deleteUser = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        await prisma.user.delete({
+            where: { id: userId },
+        });
+
+        res.json({ message: "User deleted" });
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+module.exports = { getUserData, updateUser, changePassword };
