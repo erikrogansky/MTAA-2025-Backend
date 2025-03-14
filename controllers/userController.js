@@ -1,5 +1,4 @@
 const { prisma } = require('../db');
-const jwt = require("jsonwebtoken");
 
 const getUserData = async (req, res) => {
     try {
@@ -103,4 +102,4 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { getUserData, updateUser, changePassword };
+module.exports = { getUserData, updateUser, changePassword, deleteUser };
