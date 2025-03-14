@@ -1,4 +1,5 @@
 const { prisma } = require('../db');
+const bcrypt = require('bcrypt');
 
 const getUserData = async (req, res) => {
     try {
