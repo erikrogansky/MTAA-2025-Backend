@@ -48,8 +48,12 @@ const getUserData = async (req, res) => {
     }
 };
 
-const updateMode = async (req, res) => {
-    const { mode } = req.body;
+const updateUser = async (req, res) => {
+    const { name, profilePicture, darkMode, preferences } = req.body;
+
+    if (!name && !profilePicture && !darkMode && !preferences) {
+        return res.status(400).json({ message: "No valid fields provided for update" });
+    }
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -71,17 +75,29 @@ const updateMode = async (req, res) => {
     }
 
     try {
+        const updateData = {};
+
+        if (name !== undefined) updateData.name = name;
+        if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
+        if (darkMode !== undefined) {
+            const validDarkModes = ["y", "n", "s"];
+            if (!validDarkModes.includes(darkMode)) {
+                return res.status(400).json({ message: "Invalid darkMode value. Allowed: y, n, s" });
+            }
+            updateData.darkMode = darkMode;
+        }
+        if (Array.isArray(preferences)) updateData.preferences = preferences;
+
         await prisma.user.update({
             where: { id: userId },
-            data: { darkMode: mode },
+            data: updateData,
         });
 
-        res.json({ message: "Dark mode updated" });
+        res.json({ message: "User data updated", updatedFields: updateData });
     } catch (error) {
-        console.error("Error updating dark mode:", error);
+        console.error("Error updating user data:", error);
         res.status(500).json({ message: "Internal server error" });
     }
+};
 
-}
-
-module.exports = { getUserData, updateMode };
+module.exports = { getUserData, updateUser };

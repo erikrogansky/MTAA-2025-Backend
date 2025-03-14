@@ -1,9 +1,9 @@
 const express = require('express');
-const { getUserData, updateMode } = require('../controllers/userController');
+const { getUserData, updateUser } = require('../controllers/userController');
 
 const router = express.Router();
 
 router.get('/get-data', getUserData);
-router.post('/update-mode', updateMode);
+router.post('/update', updateUser);
 
 module.exports = router;
