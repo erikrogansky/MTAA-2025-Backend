@@ -69,18 +69,20 @@ const changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const user = req.user;
 
-    if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "Current and new password required" });
+    if (!newPassword) {
+        return res.status(400).json({ message: "New password is required" });
     }
 
     try {
-        if (!user.password) {
-            return res.status(400).json({ message: "User has no password set" });
-        }
+        if (user.password) {
+            if (!currentPassword) {
+                return res.status(400).json({ message: "Current password is required" });
+            }
 
-        const passwordMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!passwordMatch) {
-            return res.status(401).json({ message: "Current password is incorrect" });
+            const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!passwordMatch) {
+                return res.status(401).json({ message: "Current password is incorrect" });
+            }
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
