@@ -67,6 +67,7 @@ model Tag {
   id        Int      @id @default(autoincrement())
   name      String
   color     String
+  group     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

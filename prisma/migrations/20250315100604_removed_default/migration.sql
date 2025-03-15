@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Tag" ALTER COLUMN "group" DROP DEFAULT;

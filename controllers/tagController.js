@@ -6,6 +6,7 @@ const getAll = async (req, res) => {
             select: {
                 name: true,
                 color: true,
+                group: true,
             },
         });
 
