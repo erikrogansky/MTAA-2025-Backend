@@ -8,6 +8,6 @@ router.get('/get-data', getUserData);
 router.put('/update', updateUser);
 router.put('/change-password', changePassword);
 router.delete('/delete', deleteUser);
-router.put('/change-picture', upload.single('file'), changePicture);
+router.post('/change-picture', upload.single('file'), changePicture);
 
 module.exports = router;

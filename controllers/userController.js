@@ -118,7 +118,8 @@ const deleteUser = async (req, res) => {
 
 
 const changePicture = async (req, res) => {
-    const userId = req.user.id;
+    const user = req.user; 
+    const userId = user.id;
 
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -130,7 +131,7 @@ const changePicture = async (req, res) => {
         if (!user.profilePicture) {
             await prisma.user.update({
                 where: { id: userId },
-                data: { profilePicture: `/profile_pictures/${userId}.jpg` },
+                data: { profilePicture: imageUrl },
             });
         }
 
@@ -140,6 +141,7 @@ const changePicture = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 
 module.exports = { getUserData, updateUser, changePassword, deleteUser, changePicture };
