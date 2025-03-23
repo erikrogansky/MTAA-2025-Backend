@@ -7,6 +7,6 @@ router.get('/get-data', getUserData);
 router.put('/update', updateUser);
 router.put('/change-password', changePassword);
 router.delete('/delete', deleteUser);
-router.put('/changePicture', changePicture);
+router.put('/change-picture', changePicture);
 
 module.exports = router;
