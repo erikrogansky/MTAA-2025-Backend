@@ -21,7 +21,7 @@ const getUserData = async (req, res) => {
             hasFacebookAuth: user.oauthAccounts.some(account => account.provider === "facebook"),
             hasGoogleAuth: user.oauthAccounts.some(account => account.provider === "google"),
             darkMode: user.darkMode,
-            profilePictureUrl: user.profilePicture ? `${process.env.SERVER_URL}/profile_pictures/${user.id}.jpg` : null,
+            profilePictureUrl: user.profilePicture ? `${process.env.SERVER_URL}/profile-pictures/${user.id}.jpg` : null,
         };
 
         res.json(userData);
