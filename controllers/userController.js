@@ -119,30 +119,20 @@ const deleteUser = async (req, res) => {
 
 const changePicture = async (req, res) => {
     const userId = req.user.id;
-    const { picture } = req.body;
 
-    if (!picture) {
-        return res.status(400).json({ message: "Picture data is required" });
+    if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
     }
 
     try {
-        const base64Data = picture.replace(/^data:image\/\w+;base64,/, '');
-        const buffer = Buffer.from(base64Data, 'base64');
-
-        const profileDir = path.join(__dirname, "../profile_pictures");
-        if (!fs.existsSync(profileDir)) {
-            fs.mkdirSync(profileDir, { recursive: true });
-        }
-
-        const filePath = path.join(profileDir, `${userId}.jpg`);
-        fs.writeFileSync(filePath, buffer);
-
         const imageUrl = `/profile_pictures/${userId}.jpg`;
 
-        await prisma.user.update({
-            where: { id: userId },
-            data: { profilePicture: imageUrl },
-        });
+        if (!user.profilePicture) {
+            await prisma.user.update({
+                where: { id: userId },
+                data: { profilePicture: `/profile_pictures/${userId}.jpg` },
+            });
+        }
 
         res.json({ message: "Profile picture updated", imageUrl });
     } catch (err) {
@@ -150,5 +140,6 @@ const changePicture = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 module.exports = { getUserData, updateUser, changePassword, deleteUser, changePicture };
