@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const usersRoutes = require("./routes/users");
 const aiRoutes = require("./routes/ai");
@@ -24,6 +25,9 @@ app.use("/users", authMiddleware, usersRoutes);
 app.use("/ai", authMiddleware, aiRoutes);
 app.use("/firebase", firebaseRoutes);
 app.use("/tags", authMiddleware, tagRoutes);
+
+// Static files
+app.use("/profile-pictures", express.static(path.join(__dirname, "profile_pictures")));
 
 const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on http://localhost:${PORT}`);

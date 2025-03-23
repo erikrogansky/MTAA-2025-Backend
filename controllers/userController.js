@@ -21,6 +21,7 @@ const getUserData = async (req, res) => {
             hasFacebookAuth: user.oauthAccounts.some(account => account.provider === "facebook"),
             hasGoogleAuth: user.oauthAccounts.some(account => account.provider === "google"),
             darkMode: user.darkMode,
+            profilePictureUrl: user.profilePicture ? `${process.env.SERVER_URL}/profile_pictures/${user.id}.jpg` : null,
         };
 
         res.json(userData);
@@ -115,4 +116,39 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { getUserData, updateUser, changePassword, deleteUser };
+
+const changePicture = async (req, res) => {
+    const userId = req.user.id;
+    const { picture } = req.body;
+
+    if (!picture) {
+        return res.status(400).json({ message: "Picture data is required" });
+    }
+
+    try {
+        const base64Data = picture.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        const profileDir = path.join(__dirname, "../profile_pictures");
+        if (!fs.existsSync(profileDir)) {
+            fs.mkdirSync(profileDir, { recursive: true });
+        }
+
+        const filePath = path.join(profileDir, `${userId}.jpg`);
+        fs.writeFileSync(filePath, buffer);
+
+        const imageUrl = `/profile_pictures/${userId}.jpg`;
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: { profilePicture: imageUrl },
+        });
+
+        res.json({ message: "Profile picture updated", imageUrl });
+    } catch (err) {
+        console.error("Error saving uploaded picture:", err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+module.exports = { getUserData, updateUser, changePassword, deleteUser, changePicture };
