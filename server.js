@@ -28,7 +28,6 @@ app.use("/firebase", firebaseRoutes);
 app.use("/tags", authMiddleware, tagRoutes);
 app.use("/recipes", authMiddleware, recipeRoutes);
 
-// Static files
 app.use("/profile-pictures", express.static(path.join(__dirname, "profile_pictures")));
 
 

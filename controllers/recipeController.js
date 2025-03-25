@@ -4,36 +4,42 @@ const createRecipe = async (req, res) => {
     try {
         const { title, tags, ingredients, instructions, isPublic, description, details } = req.body;
 
-        // Handle file uploads: cover photo and multiple images
-        const coverPhoto = req.file ? req.file.filename : null;
-        const imagePaths = req.files ? req.files.map(file => file.filename) : [];
+        console.log('Incoming fields:', req.body);
+        console.log('Incoming files:', req.files);
+
+        const isPublicBoolean = isPublic === 'true'; 
+
+        const coverPhoto = req.files.coverPhoto ? req.files.coverPhoto[0].filename : null;
+        const imagePaths = req.files['images[]'] ? req.files['images[]'].map(file => file.filename) : [];
+
         const userId = req.user.id;
 
-        // Find existing tags or create them
+        const tagArray = Array.isArray(tags) ? tags : [tags];
+
         const tagRecords = await prisma.tag.findMany({
             where: {
-                name: { in: tags }
+                name: {
+                    in: tagArray
+                }
             }
         });
 
-        // Create the recipe
         const recipe = await prisma.recipe.create({
             data: {
                 title,
                 ingredients,
                 instructions,
-                isPublic,
+                isPublic: isPublicBoolean, 
                 coverPhoto,
                 description,
                 details,
                 userId,
                 tags: {
-                    connect: tagRecords.map(tag => ({ id: tag.id })) // Connect the tags by their IDs
+                    connect: tagRecords.map(tag => ({ id: tag.id })) 
                 }
             },
         });
 
-        // If images are uploaded, create records for them in the RecipeImage model
         if (imagePaths.length > 0) {
             await prisma.recipeImage.createMany({
                 data: imagePaths.map(image => ({
