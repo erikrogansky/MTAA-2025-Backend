@@ -13,7 +13,6 @@ enum DarkMode {
   s
 }
 
-
 model User {
   id             Int      @id @default(autoincrement())
   name           String
@@ -46,7 +45,7 @@ model Session {
   id           String   @id @default(uuid())
   userId       Int
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deviceId     String   @unique // ✅ Make this unique
+  deviceId     String   @unique
   refreshToken String   @unique
   expiresAt    DateTime
   createdAt    DateTime @default(now())
@@ -72,12 +71,14 @@ model Tag {
   group     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  recipes   Recipe[] @relation("RecipeTags")
 }
 
 model Recipe {
   id          Int      @id @default(autoincrement())
   title       String
-  tags        String
+  tags        Tag[]    @relation("RecipeTags")
   ingredients String
   instructions String
   isPublic    Boolean

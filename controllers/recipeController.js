@@ -5,15 +5,18 @@ const createRecipe = async (req, res) => {
         const { title, tags, ingredients, instructions, isPublic, description, details } = req.body;
 
         const coverPhoto = req.file ? req.file.filename : null; 
-
         const imagePaths = req.files ? req.files.map(file => file.filename) : []; 
-
         const userId = req.user.id; 
+
+        const tagRecords = await prisma.tag.findMany({
+            where: {
+                name: { in: tags }
+            }
+        });
 
         const recipe = await prisma.recipe.create({
             data: {
                 title,
-                tags,
                 ingredients,
                 instructions,
                 isPublic,
@@ -21,6 +24,9 @@ const createRecipe = async (req, res) => {
                 description,
                 details,
                 userId,
+                tags: {
+                    connect: tagRecords.map(tag => ({ id: tag.id })) // Connect the tags by their IDs
+                }
             },
         });
 
