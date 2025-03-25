@@ -1,6 +1,4 @@
-
-
-import { prisma } from "../db";
+const { prisma } = require("../db");
 
 const createRecipe = async (req, res) => {
     try {
