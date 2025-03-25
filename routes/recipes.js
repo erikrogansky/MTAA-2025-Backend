@@ -3,6 +3,7 @@ const { uploadCoverPhoto, uploadMultipleImages } = require('../utils/multerRecip
 const { createRecipe } = require('../controllers/recipeController');
 
 const router = express.Router();
+
 router.post('/create', uploadCoverPhoto, uploadMultipleImages, createRecipe);
 
 module.exports = router;

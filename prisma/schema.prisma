@@ -19,7 +19,7 @@ model User {
   email          String   @unique
   password       String?
   profilePicture String?
-  darkMode       DarkMode @default(s) 
+  darkMode       DarkMode @default(s)
   preferences    String[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -78,7 +78,6 @@ model Tag {
 model Recipe {
   id          Int      @id @default(autoincrement())
   title       String
-  tags        Tag[]    @relation("RecipeTags")
   ingredients String
   instructions String
   isPublic    Boolean
@@ -90,4 +89,15 @@ model Recipe {
   updatedAt   DateTime @updatedAt
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags        Tag[]    @relation("RecipeTags")
+  images      RecipeImage[]
+}
+
+model RecipeImage {
+  id         Int      @id @default(autoincrement())
+  imagePath  String
+  recipeId   Int
+  createdAt  DateTime @default(now())
+
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }

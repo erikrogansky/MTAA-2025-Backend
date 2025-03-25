@@ -4,16 +4,19 @@ const createRecipe = async (req, res) => {
     try {
         const { title, tags, ingredients, instructions, isPublic, description, details } = req.body;
 
-        const coverPhoto = req.file ? req.file.filename : null; 
-        const imagePaths = req.files ? req.files.map(file => file.filename) : []; 
-        const userId = req.user.id; 
+        // Handle file uploads: cover photo and multiple images
+        const coverPhoto = req.file ? req.file.filename : null;
+        const imagePaths = req.files ? req.files.map(file => file.filename) : [];
+        const userId = req.user.id;
 
+        // Find existing tags or create them
         const tagRecords = await prisma.tag.findMany({
             where: {
                 name: { in: tags }
             }
         });
 
+        // Create the recipe
         const recipe = await prisma.recipe.create({
             data: {
                 title,
@@ -30,6 +33,7 @@ const createRecipe = async (req, res) => {
             },
         });
 
+        // If images are uploaded, create records for them in the RecipeImage model
         if (imagePaths.length > 0) {
             await prisma.recipeImage.createMany({
                 data: imagePaths.map(image => ({
