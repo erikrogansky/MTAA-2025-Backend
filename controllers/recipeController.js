@@ -43,4 +43,4 @@ const createRecipe = async (req, res) => {
     }
 };
 
-exports.module = { createRecipe };
+module.exports = { createRecipe };
