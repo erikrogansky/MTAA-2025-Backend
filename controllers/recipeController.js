@@ -14,7 +14,7 @@ const createRecipe = async (req, res) => {
 
         const userId = req.user.id;
 
-        const tagArray = Array.isArray(tags) ? tags : [tags];
+        const tagArray = tags.split(',');
 
         const tagRecords = await prisma.tag.findMany({
             where: {
