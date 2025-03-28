@@ -83,18 +83,17 @@ const getAllOwnRecipes = async (req, res) => {
             const coverPhotoUrl = recipe.coverPhoto
                 ? `${process.env.SERVER_URL}/recipe-images/${recipe.coverPhoto}`
                 : null;
-
+        
             return {
-                ...recipe,
-                coverPhoto: coverPhotoUrl,
-                prepTime,
-                difficulty,
+                title: recipe.title,
+                coverPhotoUrl: coverPhotoUrl,
+                prepTime: prepTime,
+                difficulty: difficulty,
                 firstTag: recipe.tags.length > 0 ? recipe.tags[0].name : null,
             };
-        });
+        });        
 
         res.status(200).json({
-            message: 'Recipes fetched successfully',
             recipes: recipesWithFormattedData,
         });
     } catch (error) {
