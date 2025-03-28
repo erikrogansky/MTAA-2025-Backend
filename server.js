@@ -29,6 +29,7 @@ app.use("/tags", authMiddleware, tagRoutes);
 app.use("/recipes", authMiddleware, recipeRoutes);
 
 app.use("/profile-pictures", express.static(path.join(__dirname, "profile_pictures")));
+app.use("/recipe-images", express.static(path.join(__dirname, "recipe_images")));
 
 
 const server = app.listen(PORT, "0.0.0.0", () => {
