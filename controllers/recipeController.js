@@ -89,7 +89,7 @@ const getAllOwnRecipes = async (req, res) => {
                 coverPhotoUrl: coverPhotoUrl,
                 prepTime: prepTime,
                 difficulty: difficulty,
-                firstTag: recipe.tags.length > 0 ? recipe.tags[0].name : null,
+                firstTag: recipe.tags.length > 0 ? recipe.tags[0] : null,
             };
         });        
 
