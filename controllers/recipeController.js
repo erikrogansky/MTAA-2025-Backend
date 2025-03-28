@@ -59,4 +59,66 @@ const createRecipe = async (req, res) => {
     }
 };
 
-module.exports = { createRecipe };
+
+const getAllOwnRecipes = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const recipes = await prisma.recipe.findMany({
+            where: {
+                userId: userId,
+            },
+            select: {
+                coverPhoto: true,
+                title: true,
+                details: true,
+                tags: {
+                    take: 1,
+                }
+            },
+        });
+
+        const recipesWithFormattedData = recipes.map(recipe => {
+            const { prepTime, difficulty } = extractDetails(recipe.details);
+            const coverPhotoUrl = recipe.coverPhoto
+                ? `${process.env.SERVER_URL}/recipe-images/${recipe.coverPhoto}`
+                : null;
+
+            return {
+                ...recipe,
+                coverPhoto: coverPhotoUrl,
+                prepTime,
+                difficulty,
+                firstTag: recipe.tags.length > 0 ? recipe.tags[0].name : null,
+            };
+        });
+
+        res.status(200).json({
+            message: 'Recipes fetched successfully',
+            recipes: recipesWithFormattedData,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while fetching recipes', error: error.message });
+    }
+};
+
+const extractDetails = (details) => {
+    let prepTime = null;
+    let difficulty = null;
+
+    const prepTimeMatch = details.match(/prepTime:\s*(\d+\.?\d*)/);
+    const difficultyMatch = details.match(/difficulty:\s*(\w+)/);
+
+    if (prepTimeMatch) {
+        prepTime = prepTimeMatch[1];
+    }
+
+    if (difficultyMatch) {
+        difficulty = difficultyMatch[1];
+    }
+
+    return { prepTime, difficulty };
+};
+
+module.exports = { createRecipe, getAllOwnRecipes };
