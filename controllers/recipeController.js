@@ -169,10 +169,12 @@ const getRecipeById = async (req, res) => {
 
         const imageUrls = recipe.images.map(img => `${process.env.SERVER_URL}/recipe-images/${img.imagePath}`);
 
+        const ingredients = parseIngredients(recipe.ingredients);
+
         const formattedRecipe = {
             id: recipe.id,
             title: recipe.title,
-            ingredients: recipe.ingredients,
+            ingredients: ingredients,
             instructions: recipe.instructions,
             isPublic: recipe.isPublic,
             description: recipe.description,
@@ -190,6 +192,25 @@ const getRecipeById = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Failed to fetch recipe', error: error.message });
     }
+};
+
+const parseIngredients = (ingredientsStr) => {
+    const ingredientsList = ingredientsStr.split(',');
+    const ingredients = [];
+
+    for (let i = 0; i < ingredientsList.length; i += 3) {
+        const icon = ingredientsList[i].trim();
+        const name = ingredientsList[i + 1].trim();
+        const quantity = ingredientsList[i + 2].trim();
+
+        ingredients.push({
+            icon: icon,
+            name: name,
+            quantity: quantity,
+        });
+    }
+
+    return ingredients;
 };
 
 
