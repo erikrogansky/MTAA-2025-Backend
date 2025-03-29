@@ -151,7 +151,7 @@ const getRecipeById = async (req, res) => {
             return res.status(404).json({ message: 'Recipe not found' });
         }
 
-        const { prepTime, difficulty } = extractDetails(recipe.details);
+        const { prepTime, difficulty, servings, calories } = extractDetails(recipe.details);
         const coverPhotoUrl = recipe.coverPhoto
             ? `${process.env.SERVER_URL}/recipe-images/${recipe.coverPhoto}`
             : null;
@@ -167,6 +167,8 @@ const getRecipeById = async (req, res) => {
             description: recipe.description,
             prepTime,
             difficulty,
+            servings,
+            calories,
             coverPhotoUrl,
             tags: recipe.tags,
             images: imageUrls,
