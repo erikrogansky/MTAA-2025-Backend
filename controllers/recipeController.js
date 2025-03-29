@@ -69,6 +69,7 @@ const getAllOwnRecipes = async (req, res) => {
                 userId: userId,
             },
             select: {
+                id: true,
                 coverPhoto: true,
                 title: true,
                 details: true,
@@ -85,6 +86,7 @@ const getAllOwnRecipes = async (req, res) => {
                 : null;
         
             return {
+                id: recipe.id,
                 title: recipe.title,
                 coverPhotoUrl: coverPhotoUrl,
                 prepTime: prepTime,
