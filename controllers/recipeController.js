@@ -122,4 +122,62 @@ const extractDetails = (details) => {
     return { prepTime, difficulty };
 };
 
-module.exports = { createRecipe, getAllOwnRecipes };
+const getRecipeById = async (req, res) => {
+    try {
+        const recipeId = parseInt(req.params.id, 10);
+
+        if (isNaN(recipeId)) {
+            return res.status(400).json({ message: 'Invalid recipe ID' });
+        }
+
+        const recipe = await prisma.recipe.findUnique({
+            where: {
+                id: recipeId,
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        profilePicture: true,
+                    }
+                },
+                tags: true,
+                images: true,
+            }
+        });
+
+        if (!recipe) {
+            return res.status(404).json({ message: 'Recipe not found' });
+        }
+
+        const { prepTime, difficulty } = extractDetails(recipe.details);
+        const coverPhotoUrl = recipe.coverPhoto
+            ? `${process.env.SERVER_URL}/recipe-images/${recipe.coverPhoto}`
+            : null;
+
+        const imageUrls = recipe.images.map(img => `${process.env.SERVER_URL}/recipe-images/${img.imagePath}`);
+
+        const formattedRecipe = {
+            id: recipe.id,
+            title: recipe.title,
+            ingredients: recipe.ingredients,
+            instructions: recipe.instructions,
+            isPublic: recipe.isPublic,
+            description: recipe.description,
+            prepTime,
+            difficulty,
+            coverPhotoUrl,
+            tags: recipe.tags,
+            images: imageUrls,
+        };
+
+        res.status(200).json({ recipe: formattedRecipe });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to fetch recipe', error: error.message });
+    }
+};
+
+
+module.exports = { createRecipe, getAllOwnRecipes, getRecipeById };
