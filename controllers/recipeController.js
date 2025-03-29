@@ -107,6 +107,8 @@ const getAllOwnRecipes = async (req, res) => {
 const extractDetails = (details) => {
     let prepTime = null;
     let difficulty = null;
+    let servings = null;
+    let calories = null;
 
     const prepTimeMatch = details.match(/prepTime:\s*(\d+\.?\d*)/);
     const difficultyMatch = details.match(/difficulty:\s*(\w+)/);
@@ -119,7 +121,16 @@ const extractDetails = (details) => {
         difficulty = difficultyMatch[1];
     }
 
-    return { prepTime, difficulty };
+    const servingsMatch = details.match(/servings:\s*(\d+\.?\d*)/);
+    if (servingsMatch) {
+        servings = servingsMatch[1];
+    }
+    const caloriesMatch = details.match(/calories:\s*(\d+\.?\d*)/);
+    if (caloriesMatch) {
+        calories = caloriesMatch[1];
+    }
+
+    return { prepTime, difficulty, servings, calories };
 };
 
 const getRecipeById = async (req, res) => {
