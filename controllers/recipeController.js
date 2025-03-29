@@ -175,7 +175,7 @@ const getRecipeById = async (req, res) => {
             id: recipe.id,
             title: recipe.title,
             ingredients: ingredients,
-            instructions: recipe.instructions,
+            instructions: recipe.instructions.split('\n').map(step => step.trim()).filter(step => step.length > 0),
             isPublic: recipe.isPublic,
             description: recipe.description,
             prepTime,
