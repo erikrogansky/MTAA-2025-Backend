@@ -130,7 +130,7 @@ const changePicture = async (req, res) => {
             where: { id: userId },
         });
 
-        const imageUrl = `/profile_pictures/${userId}.jpg`;
+        const imageUrl = `${userId}.jpg`;
 
         if (!user.profilePicture) {
             await prisma.user.update({

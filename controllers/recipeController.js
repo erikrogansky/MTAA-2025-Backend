@@ -209,7 +209,7 @@ const getRecipeById = async (req, res) => {
                 text: review.text,
                 user: {
                     name: review.user.name,
-                    profilePictureUrl: review.user.profilePicture ? `${process.env.SERVER_URL}${review.user.profilePicture}` : null,
+                    profilePictureUrl: review.user.profilePicture ? `${process.env.SERVER_URL}/profile-pictures/${review.user.profilePicture}` : null,
                 },
                 createdAt: getRelativeDate(review.createdAt),
             })),
