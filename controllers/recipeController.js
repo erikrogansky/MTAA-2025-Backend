@@ -168,7 +168,6 @@ const getRecipeById = async (req, res) => {
                     include: {
                         user: {
                             select: {
-                                id: true,
                                 name: true,
                                 profilePicture: true,
                             }
@@ -206,14 +205,13 @@ const getRecipeById = async (req, res) => {
             tags: recipe.tags,
             images: imageUrls,
             reviews: recipe.reviews.map(review => ({
-                id: review.id,
                 rating: review.rating,
                 text: review.text,
                 user: {
-                    id: review.user.id,
                     name: review.user.name,
                     profilePicture: review.user.profilePicture ? `${process.env.SERVER_URL}/profile-images/${review.user.profilePicture}` : null,
                 },
+                createdAt: review.createdAt,
             })),
         };
 
