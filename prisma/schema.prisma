@@ -29,7 +29,7 @@ model User {
   devices       Device[]
 
   recipes      Recipe[]
-  RecipeRating RecipeRating[]
+  reviews RecipeRating[]
 }
 
 model OAuthAccount {
@@ -92,7 +92,7 @@ model Recipe {
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   tags         Tag[]          @relation("RecipeTags")
   images       RecipeImage[]
-  RecipeRating RecipeRating[]
+  reviews RecipeRating[]
 }
 
 model RecipeImage {
