@@ -1,4 +1,4 @@
-const { format, formatDistanceToNow, differenceInDays, parseISO } = require('date-fns');
+const { format, formatDistanceToNow, differenceInDays } = require('date-fns');
 const { prisma } = require("../db");
 
 const createRecipe = async (req, res) => {
@@ -223,15 +223,14 @@ const getRecipeById = async (req, res) => {
 };
 
 function getRelativeDate(createdAt) {
-    const date = parseISO(createdAt);
-    const daysDiff = differenceInDays(new Date(), date);
+    const daysDiff = differenceInDays(new Date(), createdAt);
   
     if (daysDiff <= 7) {
-      return formatDistanceToNow(date, { addSuffix: true });
+      return formatDistanceToNow(createdAt, { addSuffix: true });
     }
   
-    return format(date, 'MM/dd/yyyy');
-}
+    return format(createdAt, 'MM/dd/yyyy');
+  }
 
 const parseIngredients = (ingredientsStr) => {
     const ingredientsList = ingredientsStr.split(',');
