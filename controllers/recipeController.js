@@ -1,3 +1,4 @@
+const { text } = require("express");
 const { prisma } = require("../db");
 
 const createRecipe = async (req, res) => {
@@ -84,6 +85,9 @@ const getAllOwnRecipes = async (req, res) => {
             const coverPhotoUrl = recipe.coverPhoto
                 ? `${process.env.SERVER_URL}/recipe-images/${recipe.coverPhoto}`
                 : null;
+
+            const overallRating = recipe.reviews.reduce((acc, review) => acc + review.rating, 0) / (recipe.reviews.length || 1);
+            const formattedRating = Math.round(overallRating);
         
             return {
                 id: recipe.id,
@@ -92,6 +96,7 @@ const getAllOwnRecipes = async (req, res) => {
                 prepTime: prepTime,
                 difficulty: difficulty,
                 firstTag: recipe.tags.length > 0 ? recipe.tags[0] : null,
+                overallRating: formattedRating,
             };
         });        
 
@@ -155,6 +160,17 @@ const getRecipeById = async (req, res) => {
                 },
                 tags: true,
                 images: true,
+                reviews: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                profilePicture: true,
+                            }
+                        }
+                    }
+                }
             }
         });
 
@@ -185,6 +201,16 @@ const getRecipeById = async (req, res) => {
             coverPhotoUrl,
             tags: recipe.tags,
             images: imageUrls,
+            reviews: recipe.reviews.map(review => ({
+                id: review.id,
+                rating: review.rating,
+                text: review.text,
+                user: {
+                    id: review.user.id,
+                    name: review.user.name,
+                    profilePicture: review.user.profilePicture ? `${process.env.SERVER_URL}/profile-images/${review.user.profilePicture}` : null,
+                },
+            })),
         };
 
         res.status(200).json({ recipe: formattedRecipe });
@@ -213,5 +239,25 @@ const parseIngredients = (ingredientsStr) => {
     return ingredients;
 };
 
+const addReview = async (req, res) => {
+    try {
+        const { recipeId, rating, comment } = req.body;
 
-module.exports = { createRecipe, getAllOwnRecipes, getRecipeById };
+        await prisma.review.create({
+            data: {
+                recipeId,
+                userId: req.user.id,
+                rating,
+                text: comment,
+            },
+        });
+
+        res.status(201).json({ message: 'Review added successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to add review', error: error.message });
+    }
+};
+
+
+module.exports = { createRecipe, getAllOwnRecipes, getRecipeById, addReview };
