@@ -245,7 +245,7 @@ const addReview = async (req, res) => {
     try {
         const { recipeId, rating, comment } = req.body;
 
-        await prisma.review.create({
+        await prisma.recipeRating.create({
             data: {
                 recipeId,
                 userId: req.user.id,
