@@ -159,7 +159,6 @@ const getRecipeById = async (req, res) => {
                     select: {
                         id: true,
                         name: true,
-                        profilePicture: true,
                     }
                 },
                 tags: true,
@@ -169,7 +168,6 @@ const getRecipeById = async (req, res) => {
                         user: {
                             select: {
                                 name: true,
-                                profilePicture: true,
                             }
                         }
                     }
@@ -209,7 +207,7 @@ const getRecipeById = async (req, res) => {
                 text: review.text,
                 user: {
                     name: review.user.name,
-                    profilePicture: review.user.profilePicture ? `${process.env.SERVER_URL}/profile-images/${review.user.profilePicture}` : null,
+                    profilePicture: `${process.env.SERVER_URL}/profile_pictures/${review.user.id}.jpg`,
                 },
                 createdAt: getRelativeDate(review.createdAt),
             })),
