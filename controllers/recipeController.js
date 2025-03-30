@@ -86,8 +86,11 @@ const getAllOwnRecipes = async (req, res) => {
                 ? `${process.env.SERVER_URL}/recipe-images/${recipe.coverPhoto}`
                 : null;
 
-            const overallRating = recipe.reviews.reduce((acc, review) => acc + review.rating, 0) / (recipe.reviews.length || 1);
+            const overallRating = recipe.reviews.length
+                ? recipe.reviews.reduce((acc, review) => acc + review.rating, 0) / recipe.reviews.length
+                : 0;
             const formattedRating = Math.round(overallRating);
+              
         
             return {
                 id: recipe.id,
