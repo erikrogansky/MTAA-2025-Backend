@@ -1,4 +1,4 @@
-const { text } = require("express");
+const { format, formatDistanceToNow, differenceInDays, parseISO } = require('date-fns');
 const { prisma } = require("../db");
 
 const createRecipe = async (req, res) => {
@@ -211,7 +211,7 @@ const getRecipeById = async (req, res) => {
                     name: review.user.name,
                     profilePicture: review.user.profilePicture ? `${process.env.SERVER_URL}/profile-images/${review.user.profilePicture}` : null,
                 },
-                createdAt: review.createdAt,
+                createdAt: getRelativeDate(review.createdAt),
             })),
         };
 
@@ -221,6 +221,17 @@ const getRecipeById = async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch recipe', error: error.message });
     }
 };
+
+function getRelativeDate(createdAt) {
+    const date = parseISO(createdAt);
+    const daysDiff = differenceInDays(new Date(), date);
+  
+    if (daysDiff <= 7) {
+      return formatDistanceToNow(date, { addSuffix: true });
+    }
+  
+    return format(date, 'MM/dd/yyyy');
+}
 
 const parseIngredients = (ingredientsStr) => {
     const ingredientsList = ingredientsStr.split(',');
