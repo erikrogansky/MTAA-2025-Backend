@@ -1,5 +1,6 @@
 const { format, formatDistanceToNow, differenceInDays } = require('date-fns');
 const { prisma } = require("../db");
+const { is } = require('date-fns/locale');
 
 const createRecipe = async (req, res) => {
     try {
@@ -213,6 +214,7 @@ const getRecipeById = async (req, res) => {
                 },
                 createdAt: getRelativeDate(review.createdAt),
             })),
+            isOwn: recipe.userId === req.user.id,
         };
 
         res.status(200).json({ recipe: formattedRecipe });
@@ -270,30 +272,5 @@ const addReview = async (req, res) => {
         res.status(500).json({ message: 'Failed to add review', error: error.message });
     }
 };
-
-const isOwn = async (req, res, next) => {
-    const recipeId = parseInt(req.params.id, 10);
-    const userId = req.user.id;
-
-    if (isNaN(recipeId)) {
-        return res.status(400).json({ message: 'Invalid recipe ID' });
-    }
-
-    const recipe = await prisma.recipe.findUnique({
-        where: {
-            id: recipeId,
-        },
-    });
-    
-    if (!recipe) {
-        return res.status(404).json({ message: 'Recipe not found' });
-    }
-
-    if (recipe.userId !== userId) {
-        return res.status(200).json({ message: false });
-    } else {
-        return res.status(200).json({ message: true });
-    }
-}
 
 module.exports = { createRecipe, getAllOwnRecipes, getRecipeById, addReview, isOwn };
