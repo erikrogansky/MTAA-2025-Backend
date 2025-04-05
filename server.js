@@ -10,9 +10,11 @@ const recipeRoutes = require("./routes/recipes");
 const errorHandler = require("./middleware/errorHandler");
 const authMiddleware = require("./middleware/authMiddleware");
 const { initializeWebSocket } = require("./socket");
+const setupSwagger = require('./swagger');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
+setupSwagger(app);
 
 app.use(express.json());
 app.use(errorHandler);

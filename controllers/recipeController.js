@@ -271,5 +271,29 @@ const addReview = async (req, res) => {
     }
 };
 
+const isOwn = async (req, res, next) => {
+    const recipeId = parseInt(req.params.id, 10);
+    const userId = req.user.id;
 
-module.exports = { createRecipe, getAllOwnRecipes, getRecipeById, addReview };
+    if (isNaN(recipeId)) {
+        return res.status(400).json({ message: 'Invalid recipe ID' });
+    }
+
+    const recipe = await prisma.recipe.findUnique({
+        where: {
+            id: recipeId,
+        },
+    });
+    
+    if (!recipe) {
+        return res.status(404).json({ message: 'Recipe not found' });
+    }
+
+    if (recipe.userId !== userId) {
+        return res.status(200).json({ message: false });
+    } else {
+        return res.status(200).json({ message: true });
+    }
+}
+
+module.exports = { createRecipe, getAllOwnRecipes, getRecipeById, addReview, isOwn };
