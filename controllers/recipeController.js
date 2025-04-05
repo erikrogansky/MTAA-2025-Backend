@@ -273,4 +273,4 @@ const addReview = async (req, res) => {
     }
 };
 
-module.exports = { createRecipe, getAllOwnRecipes, getRecipeById, addReview, isOwn };
+module.exports = { createRecipe, getAllOwnRecipes, getRecipeById, addReview };
