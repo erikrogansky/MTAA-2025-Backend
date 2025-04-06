@@ -85,6 +85,7 @@ model Recipe {
   coverPhoto   String?
   description  String
   details      String?
+  country      String?
   userId       Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

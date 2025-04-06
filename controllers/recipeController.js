@@ -3,7 +3,7 @@ const { prisma } = require("../db");
 
 const createRecipe = async (req, res) => {
     try {
-        const { recipeId, title, tags, ingredients, instructions, isPublic, description, details } = req.body;
+        const { recipeId, title, tags, ingredients, instructions, isPublic, description, details, country } = req.body;
 
         const isPublicBoolean = isPublic === 'true'; 
 
@@ -50,6 +50,7 @@ const createRecipe = async (req, res) => {
                     coverPhoto,
                     description,
                     details,
+                    country: country || null,
                     tags: {
                         connect: tagRecords.map(tag => ({ id: tag.id }))
                     }
@@ -79,6 +80,7 @@ const createRecipe = async (req, res) => {
                     coverPhoto,
                     description,
                     details,
+                    country: country || null,
                     userId,
                     tags: {
                         connect: tagRecords.map(tag => ({ id: tag.id })) 
