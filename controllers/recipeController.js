@@ -24,24 +24,24 @@ const createRecipe = async (req, res) => {
         let recipe;
 
         if (recipeId) {
-            recipeId = parseInt(recipeId, 10);
-            if (isNaN(recipeId)) {
+            const parsedRecipeId = parseInt(recipeId, 10);
+            if (isNaN(parsedRecipeId)) {
                 return res.status(400).json({ message: 'Invalid recipe ID' });
             }
             
             await prisma.recipe.update({
-                where: { id: recipeId },
+                where: { id: parsedRecipeId },
                 data: {
                     tags: { set: [] }
                 }
             });
 
             await prisma.recipeImage.deleteMany({
-                where: { recipeId }
+                where: { recipeId: parsedRecipeId }
             });
 
             recipe = await prisma.recipe.update({
-                where: { id: recipeId },
+                where: { id: parsedRecipeId },
                 data: {
                     title,
                     ingredients,
