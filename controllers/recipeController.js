@@ -24,6 +24,11 @@ const createRecipe = async (req, res) => {
         let recipe;
 
         if (recipeId) {
+            recipeId = parseInt(recipeId, 10);
+            if (isNaN(recipeId)) {
+                return res.status(400).json({ message: 'Invalid recipe ID' });
+            }
+            
             await prisma.recipe.update({
                 where: { id: recipeId },
                 data: {
