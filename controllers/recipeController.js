@@ -123,9 +123,15 @@ const getAllOwnRecipes = async (req, res) => {
                 details: true,
                 tags: {
                     take: 1,
+                },
+                reviews: {
+                    select: {
+                        rating: true,
+                    }
                 }
             },
         });
+        
 
         const recipesWithFormattedData = recipes.map(recipe => {
             const { prepTime, difficulty } = extractDetails(recipe.details);
