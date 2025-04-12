@@ -261,6 +261,7 @@ const getRecipeById = async (req, res) => {
                 createdAt: getRelativeDate(review.createdAt),
             })),
             isOwn: recipe.userId === req.user.id,
+            country: recipe.country,
         };
 
         res.status(200).json({ recipe: formattedRecipe });
