@@ -3,9 +3,9 @@ const { testAi, recipeDetails, recipeDescription } = require('../controllers/aiC
 
 const router = express.Router();
 
-router.get('/', testAi);
+router.post('/', testAi);
 
-router.get('/recipe-details', recipeDetails);
-router.get('/recipe-description', recipeDescription);
+router.post('/recipe-details', recipeDetails);
+router.post('/recipe-description', recipeDescription);
 
 module.exports = router;
