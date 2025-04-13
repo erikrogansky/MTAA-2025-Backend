@@ -9,7 +9,7 @@ const generateInitialsImage = async (name, userId) => {
         .slice(0, 2)
         .join("");
 
-    const image = new Jimp(256, 256, "#ffffff");
+    const image = await Jimp.create(256, 256, "#ffffff");
     const font = await Jimp.loadFont(Jimp.FONT_SANS_128_BLACK);
 
     image.print(
