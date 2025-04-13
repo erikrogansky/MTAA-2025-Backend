@@ -168,6 +168,63 @@ const getAllOwnRecipes = async (req, res) => {
     }
 };
 
+const getPublicRecipes = async (req, res) => {
+    try {
+        const recipes = await prisma.recipe.findMany({
+            where: {
+                isPublic: true,
+            },
+            select: {
+                id: true,
+                coverPhoto: true,
+                title: true,
+                details: true,
+                tags: {
+                    take: 1,
+                },
+                reviews: {
+                    select: {
+                        rating: true,
+                    }
+                }
+            },
+        });
+
+        const recipesWithFormattedData = recipes.map(recipe => {
+            const { prepTime, difficulty, servings, calories } = extractDetails(recipe.details);
+            const coverPhotoUrl = recipe.coverPhoto
+                ? `${process.env.SERVER_URL}/recipe-images/${recipe.coverPhoto}`
+                : null;
+
+            const reviews = Array.isArray(recipe.reviews) ? recipe.reviews : [];
+            const overallRating = reviews.length
+              ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+              : 0;
+            const formattedRating = Math.round(overallRating);
+        
+            return {
+                id: recipe.id,
+                title: recipe.title,
+                coverPhotoUrl: coverPhotoUrl,
+                prepTime: prepTime,
+                difficulty: difficulty,
+                servings: servings,
+                calories: calories,
+                firstTag: recipe.tags.length > 0 ? recipe.tags[0] : null,
+                overallRating: formattedRating,
+            };
+        });
+
+        res.status(200).json({
+            recipes: recipesWithFormattedData,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while fetching public recipes', error: error.message });
+    }
+};
+
+
 const extractDetails = (details) => {
     let prepTime = null;
     let difficulty = null;
@@ -328,4 +385,4 @@ const addReview = async (req, res) => {
     }
 };
 
-module.exports = { createRecipe, getAllOwnRecipes, getRecipeById, addReview };
+module.exports = { createRecipe, getAllOwnRecipes, getPublicRecipes, getRecipeById, addReview };
