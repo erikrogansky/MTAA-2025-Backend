@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const { sendPushNotification } = require("../utils/firebaseHelper");
 const admin = require("firebase-admin");
 const { sendMessageToUser } = require("../socket-manager");
-const { generateImages } = require("../utils/generateImage");
+const { generateInitialsImage } = require("../utils/generateImage");
 
 if (!admin.apps.length) {
     admin.initializeApp({
