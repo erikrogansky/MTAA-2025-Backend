@@ -179,6 +179,7 @@ const getPublicRecipes = async (req, res) => {
                 coverPhoto: true,
                 title: true,
                 details: true,
+                country: true,
                 tags: {
                     take: 1,
                 },
@@ -212,6 +213,8 @@ const getPublicRecipes = async (req, res) => {
                 calories: calories,
                 firstTag: recipe.tags.length > 0 ? recipe.tags[0] : null,
                 overallRating: formattedRating,
+                country: recipe.country,
+
             };
         });
 
