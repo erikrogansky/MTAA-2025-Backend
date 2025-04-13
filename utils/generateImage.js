@@ -21,7 +21,6 @@ const generateInitialsImage = async (name, userId) => {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext("2d");
 
-    // Choose a random background color
     const backgroundColor = backgroundColors[Math.floor(Math.random() * backgroundColors.length)];
     const textColor = getContrastTextColor(backgroundColor);
 
@@ -38,13 +37,12 @@ const generateInitialsImage = async (name, userId) => {
     ctx.textBaseline = "middle";
     ctx.fillText(initials, width / 2, height / 2);
 
-    const safeUserId = userId.replace(/[^\w\-]/g, "_");
     const profileDir = path.join(__dirname, "../profile_pictures");
     if (!fs.existsSync(profileDir)) {
         fs.mkdirSync(profileDir, { recursive: true });
     }
 
-    const filePath = path.join(profileDir, `${safeUserId}.jpg`);
+    const filePath = path.join(profileDir, `${userId}.jpg`);
     const buffer = canvas.toBuffer("image/jpeg", { quality: 0.8 });
     fs.writeFileSync(filePath, buffer);
 
