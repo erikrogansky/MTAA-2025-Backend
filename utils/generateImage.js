@@ -46,7 +46,7 @@ const generateInitialsImage = async (name, userId) => {
     const buffer = canvas.toBuffer("image/jpeg", { quality: 0.8 });
     fs.writeFileSync(filePath, buffer);
 
-    return filePath;
+    return `${userId}.jpg`;
 };
 
 module.exports = { generateInitialsImage };
