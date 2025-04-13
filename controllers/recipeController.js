@@ -134,7 +134,7 @@ const getAllOwnRecipes = async (req, res) => {
         
 
         const recipesWithFormattedData = recipes.map(recipe => {
-            const { prepTime, difficulty } = extractDetails(recipe.details);
+            const { prepTime, difficulty, servings, calories } = extractDetails(recipe.details);
             const coverPhotoUrl = recipe.coverPhoto
                 ? `${process.env.SERVER_URL}/recipe-images/${recipe.coverPhoto}`
                 : null;
@@ -152,6 +152,8 @@ const getAllOwnRecipes = async (req, res) => {
                 coverPhotoUrl: coverPhotoUrl,
                 prepTime: prepTime,
                 difficulty: difficulty,
+                servings: servings,
+                calories: calories,
                 firstTag: recipe.tags.length > 0 ? recipe.tags[0] : null,
                 overallRating: formattedRating,
             };
