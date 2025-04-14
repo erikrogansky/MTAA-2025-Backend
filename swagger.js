@@ -6,9 +6,9 @@ const setupSwagger = (app) => {
     definition: {
       openapi: '3.0.0',
       info: {
-        title: 'Node.js API',
+        title: 'Cookly API',
         version: '1.0.0',
-        description: 'A simple API to demonstrate Swagger integration in Node.js',
+        description: 'API documentation for Cookly, a recipe management application. This API provides endpoints for creating, managing, and sharing recipes, as well as user authentication and interaction.',
       },
 
       components: {
@@ -19,7 +19,7 @@ const setupSwagger = (app) => {
             bearerFormat: 'JWT',
           },
         },
-    },
+      },
     },
     apis: ['./routes/*.js'],
   };
