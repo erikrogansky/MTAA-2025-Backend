@@ -83,6 +83,10 @@ const router = express.Router();
  *         description: Recipe updated successfully
  *       400:
  *         description: Invalid input
+ *       403:
+ *         description: You can only update your own recipes
+ *       404:
+ *         description: Recipe not found
  *       500:
  *         description: Server error
  */
@@ -263,6 +267,8 @@ router.get('/get-public', getPublicRecipes);
  *                 country: "United States"
  *       400:
  *         description: Invalid recipe ID
+ *       403:
+ *         description: You do not have permission to view this recipe
  *       404:
  *         description: Recipe not found
  *       500:

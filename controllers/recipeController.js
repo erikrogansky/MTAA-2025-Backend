@@ -28,6 +28,18 @@ const createRecipe = async (req, res) => {
             if (isNaN(parsedRecipeId)) {
                 return res.status(400).json({ message: 'Invalid recipe ID' });
             }
+
+            const existingRecipe = await prisma.recipe.findUnique({
+                where: { id: parsedRecipeId },
+            });
+
+            if (!existingRecipe) {
+                return res.status(404).json({ message: 'Recipe not found' });
+            }
+
+            if (existingRecipe.userId !== userId) {
+                return res.status(403).json({ message: 'You can only update your own recipes' });
+            }
             
             await prisma.recipe.update({
                 where: { id: parsedRecipeId },
@@ -294,6 +306,10 @@ const getRecipeById = async (req, res) => {
 
         if (!recipe) {
             return res.status(404).json({ message: 'Recipe not found' });
+        }
+
+        if (!recipe.isPublic && recipe.userId !== req.user.id) {
+            return res.status(403).json({ message: 'You do not have permission to view this recipe' });
         }
 
         const { prepTime, difficulty, servings, calories } = extractDetails(recipe.details);
