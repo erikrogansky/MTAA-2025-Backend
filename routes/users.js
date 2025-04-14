@@ -9,25 +9,23 @@ const router = express.Router();
  * /users/get-data:
  *   get:
  *     tags:
- *      - Users
+ *       - User
  *     summary: Get user data
- *     description: Retrieve data for the currently authenticated user
+ *     description: Returns detailed user data including connected OAuth accounts, preferences, and profile picture URL.
  *     security:
- *       - BearerAuth: [] 
+ *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: Successfully fetched user data
+ *         description: User data retrieved successfully
  *         content:
  *           application/json:
- *             example: 
- *               {
- *                 "name": "John Doe",
- *                 "hasPassword": true,
- *                 "hasFacebookAuth": true,
- *                 "hasGoogleAuth": false,
- *                 "darkMode": "y",
- *                 "profilePictureUrl": "http://example.com/profile-pictures/1.jpg"
- *               }
+ *             example:
+ *               name: "John Doe"
+ *               hasPassword: true
+ *               hasFacebookAuth: false
+ *               hasGoogleAuth: true
+ *               darkMode: "y"
+ *               profilePictureUrl: "SERVERURL/profile-pictures/123.jpg"
  *       404:
  *         description: User not found
  *       500:
@@ -40,11 +38,11 @@ router.get('/get-data', getUserData);
  * /users/update:
  *   put:
  *     tags:
- *      - Users
+ *       - User
  *     summary: Update user data
- *     description: Update user details such as name, profile picture, dark mode preference, or preferences.
+ *     description: Allows updating name, profile picture and dark mode preference.
  *     security:
- *       - BearerAuth: [] 
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -58,19 +56,27 @@ router.get('/get-data', getUserData);
  *                 type: string
  *               mode:
  *                 type: string
- *                 enum: [y, n, s]
+ *                 enum: ["y", "n", "s"]
  *               preferences:
  *                 type: array
  *                 items:
  *                   type: string
+ *           example:
+ *             name: "Jane Doe"
+ *             profilePicture: "jane.jpg"
+ *             mode: "n"
+ *             preferences: []
  *     responses:
  *       200:
- *         description: Successfully updated user data
+ *         description: User data updated
  *         content:
  *           application/json:
- *             example: { "message": "User data updated", "updatedFields": { "name": "John" } }
+ *             example:
+ *               message: "User data updated"
+ *               updatedFields:
+ *                 name: "Jane Doe"
  *       400:
- *         description: Invalid input or missing fields
+ *         description: No valid fields provided
  *       500:
  *         description: Internal server error
  */
@@ -81,11 +87,11 @@ router.put('/update', updateUser);
  * /users/change-password:
  *   put:
  *     tags:
- *      - Users
+ *       - User
  *     summary: Change user password
- *     description: Change the current password to a new password, with validation of the current password.
+ *     description: Changes the password. If a password already exists, current password is required.
  *     security:
- *       - BearerAuth: [] 
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -97,13 +103,19 @@ router.put('/update', updateUser);
  *                 type: string
  *               newPassword:
  *                 type: string
+ *                 minLength: 8
+ *             required:
+ *               - newPassword
+ *           example:
+ *             currentPassword: "OldP@ss123"
+ *             newPassword: "NewStr0ngP@ssword!"
  *     responses:
  *       200:
- *         description: Successfully changed password
+ *         description: Password updated
  *       400:
- *         description: Missing or invalid passwords
+ *         description: Missing required fields
  *       401:
- *         description: Incorrect current password
+ *         description: Current password incorrect
  *       500:
  *         description: Internal server error
  */
@@ -114,14 +126,18 @@ router.put('/change-password', changePassword);
  * /users/delete:
  *   delete:
  *     tags:
- *      - Users
+ *       - User
  *     summary: Delete user account
- *     description: Permanently delete the currently authenticated user's account.
+ *     description: Deletes the currently authenticated user's account.
  *     security:
- *       - BearerAuth: [] 
+ *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: User account successfully deleted
+ *         description: User deleted
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "User deleted"
  *       500:
  *         description: Internal server error
  */
@@ -132,11 +148,11 @@ router.delete('/delete', deleteUser);
  * /users/change-picture:
  *   post:
  *     tags:
- *      - Users
- *     summary: Change profile picture
- *     description: Upload a new profile picture for the authenticated user.
+ *       - User
+ *     summary: Upload or change profile picture
+ *     description: Uploads a new profile picture for the user. Expects a single image file as multipart/form-data.
  *     security:
- *       - BearerAuth: [] 
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -149,10 +165,12 @@ router.delete('/delete', deleteUser);
  *                 format: binary
  *     responses:
  *       200:
- *         description: Successfully updated profile picture
+ *         description: Profile picture updated
  *         content:
  *           application/json:
- *             example: { "message": "Profile picture updated", "imageUrl": "1.jpg" }
+ *             example:
+ *               message: "Profile picture updated"
+ *               imageUrl: "123.jpg"
  *       400:
  *         description: No file uploaded
  *       500:

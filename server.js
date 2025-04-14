@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/users", authMiddleware, usersRoutes);
 app.use("/ai", authMiddleware, aiRoutes);
-app.use("/firebase", firebaseRoutes);
+//app.use("/firebase", firebaseRoutes);
 app.use("/tags", authMiddleware, tagRoutes);
 app.use("/recipes", authMiddleware, recipeRoutes);
 

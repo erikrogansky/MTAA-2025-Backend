@@ -9,7 +9,7 @@ const router = express.Router();
  * /auth/register:
  *   post:
  *     tags:
- *      - Auth
+ *       - Auth
  *     summary: Register a new user
  *     description: Creates a new user and returns the access token and refresh token.
  *     requestBody:
@@ -21,22 +21,38 @@ const router = express.Router();
  *             properties:
  *               name:
  *                 type: string
+ *                 description: Full name of the user
  *               email:
  *                 type: string
+ *                 format: email
  *               password:
  *                 type: string
+ *                 format: password
+ *                 minLength: 8
  *               preferences:
  *                 type: array
  *                 items:
  *                   type: string
  *               deviceId:
  *                 type: string
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *               - deviceId
+ *           example:
+ *             name: "John Doe"
+ *             email: "john.doe@example.com"
+ *             password: "Str0ngP@ssword!"
+ *             deviceId: "a1b2c3d4e5f6"
  *     responses:
  *       201:
  *         description: Successfully created user and generated tokens
  *         content:
  *           application/json:
- *             example: { "accessToken": "yourAccessToken", "refreshToken": "yourRefreshToken" }
+ *             example:
+ *               accessToken: "yourAccessToken"
+ *               refreshToken: "yourRefreshToken"
  *       400:
  *         description: Missing or invalid input data
  *       500:
@@ -49,7 +65,7 @@ router.post("/register", register);
  * /auth/login:
  *   post:
  *     tags:
- *      - Auth
+ *       - Auth
  *     summary: Login a user
  *     description: Login with email and password, and return access and refresh tokens.
  *     requestBody:
@@ -61,18 +77,34 @@ router.post("/register", register);
  *             properties:
  *               email:
  *                 type: string
+ *                 format: email
+ *                 description: User's email address
  *               password:
  *                 type: string
+ *                 format: password
+ *                 description: User's password
  *               deviceId:
  *                 type: string
+ *                 description: Unique ID of the user's device
  *               firebaseToken:
  *                 type: string
+ *                 description: Firebase token for push notifications
+ *             required:
+ *               - email
+ *               - password
+ *               - deviceId
+ *           example:
+ *             email: "john.doe@example.com"
+ *             password: "Str0ngP@ssword!"
+ *             deviceId: "a1b2c3d4e5f6"
  *     responses:
  *       200:
  *         description: Successfully logged in and generated tokens
  *         content:
  *           application/json:
- *             example: { "accessToken": "yourAccessToken", "refreshToken": "yourRefreshToken" }
+ *             example:
+ *               accessToken: "yourAccessToken"
+ *               refreshToken: "yourRefreshToken"
  *       400:
  *         description: Invalid credentials or missing data
  *       500:
@@ -121,7 +153,7 @@ router.post("/oauth", oauthLogin);
  * /auth/refresh-token:
  *   post:
  *     tags:
- *      - Auth
+ *       - Auth
  *     summary: Refresh the access token using the refresh token
  *     description: Use a valid refresh token to get a new access token.
  *     requestBody:
@@ -133,14 +165,23 @@ router.post("/oauth", oauthLogin);
  *             properties:
  *               refreshToken:
  *                 type: string
+ *                 description: The refresh token issued during login
  *               deviceId:
  *                 type: string
+ *                 description: Unique ID of the user's device
+ *             required:
+ *               - refreshToken
+ *               - deviceId
+ *           example:
+ *             refreshToken: "yourRefreshToken"
+ *             deviceId: "a1b2c3d4e5f6"
  *     responses:
  *       200:
  *         description: Successfully refreshed access token
  *         content:
  *           application/json:
- *             example: { "accessToken": "yourNewAccessToken" }
+ *             example:
+ *               accessToken: "yourNewAccessToken"
  *       401:
  *         description: Invalid refresh token
  *       403:
@@ -155,7 +196,7 @@ router.post("/refresh-token", refreshAccessToken);
  * /auth/logout:
  *   post:
  *     tags:
- *      - Auth
+ *       - Auth
  *     summary: Logout from a single device
  *     description: Logout from the current device by invalidating the refresh token.
  *     security:
@@ -169,14 +210,23 @@ router.post("/refresh-token", refreshAccessToken);
  *             properties:
  *               refreshToken:
  *                 type: string
+ *                 description: Refresh token to invalidate
  *               deviceId:
  *                 type: string
+ *                 description: ID of the device to log out
+ *             required:
+ *               - refreshToken
+ *               - deviceId
+ *           example:
+ *             refreshToken: "yourRefreshToken"
+ *             deviceId: "a1b2c3d4e5f6"
  *     responses:
  *       200:
  *         description: Successfully logged out from the device
  *         content:
  *           application/json:
- *             example: { "message": "Logged out from this device" }
+ *             example:
+ *               message: "Logged out from this device"
  *       400:
  *         description: Missing or invalid refresh token
  *       401:
@@ -191,7 +241,7 @@ router.post("/logout", authMiddleware, logout);
  * /auth/logout-all:
  *   post:
  *     tags:
- *      - Auth
+ *       - Auth
  *     summary: Logout from all devices
  *     description: Invalidate all refresh tokens and logout from all devices for the user.
  *     security:
@@ -205,12 +255,18 @@ router.post("/logout", authMiddleware, logout);
  *             properties:
  *               refreshToken:
  *                 type: string
+ *                 description: A valid refresh token to identify the user session
+ *             required:
+ *               - refreshToken
+ *           example:
+ *             refreshToken: "yourRefreshToken"
  *     responses:
  *       200:
  *         description: Successfully logged out from all devices
  *         content:
  *           application/json:
- *             example: { "message": "Logged out from all devices" }
+ *             example:
+ *               message: "Logged out from all devices"
  *       400:
  *         description: Missing or invalid refresh token
  *       401:

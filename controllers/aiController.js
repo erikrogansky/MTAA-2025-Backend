@@ -5,32 +5,6 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
-const testAi = async (req, res) => {
-    try {
-        const userMessage = req.query.message || null;
-
-        if (!userMessage) {
-            return res.status(400).json({ error: 'Message is required' });
-        }
-
-        const completion = await openai.chat.completions.create({
-            model: "deepseek/deepseek-r1-distill-llama-70b:free",
-            messages: [
-                {
-                    "role": "user",
-                    "content": userMessage
-                }
-            ]
-        });
-
-        res.json({ message: completion.choices[0].message.content });
-    } catch (error) {
-        console.error('OpenAI API error:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-};
-
-
 const recipeDetails = async (req, res) => {
     try {
         const recipe = req.body || null;
@@ -218,4 +192,4 @@ const recipeDescription = async (req, res) => {
 
 
 
-module.exports = { testAi, recipeDetails, recipeDescription };
+module.exports = { recipeDetails, recipeDescription };
