@@ -35,7 +35,7 @@ const router = express.Router();
  *                 description: Ingredients list, separated by commas. Example - "emoji_spaghetti,Spaghetti,1 pack,emoji_cheese_wedge,Cheese,250 g"
  *               instructions:
  *                 type: string
- *                 description: Step-by-step instructions for preparing the recipe.
+ *                 description: Step-by-step instructions for preparing the recipe separated by newline character.
  *               isPublic:
  *                 type: string
  *                 description: Whether the recipe is public or private. (true/false)
@@ -44,10 +44,10 @@ const router = express.Router();
  *                 description: A short description of the recipe.
  *               details:
  *                 type: string
- *                 description: Detailed description of preparation time, servings, calories, etc.
+ *                 description: Preparation time, servings, calories, and difficulty in format "prepTime$ 0.25, difficulty$ EASY, servings$ 4, calories$ 1400" where $ is supposed to be a colon.
  *               country:
  *                 type: string
- *                 description: The country of origin of the recipe.
+ *                 description: The country of origin of the recipe. (optional)
  *               coverPhoto:
  *                 type: string
  *                 format: binary
@@ -62,7 +62,7 @@ const router = express.Router();
  *             title: "Awesome Spaghetti"
  *             tags: "European"
  *             ingredients: "emoji_spaghetti,Spaghetti,1 pack,emoji_cheese_wedge,Cheese,250 g,emoji_canned_food,Ketchup,To taste,emoji_garlic,Garlic,2 cloves"
- *             instructions: "Cook spaghetti with a bit of salt, add basil, ketchup, salt, pepper, and garlic in a pan, cook it a bit, then add spaghetti and mix on a small fire, Enjoy :)"
+ *             instructions: "Cook spaghetti with a bit of salt.\nAdd basil, ketchup, salt, pepper, and garlic in a pan.\nCook it a bit.\nThen add spaghetti and mix on a small fire.\nEnjoy :)"
  *             isPublic: "true"
  *             description: "Tender spaghetti basks in a rich, creamy sauce, blending melted cheese and a hint of garlic, freshened with basil."
  *             details: "prepTime: 0.25, difficulty: EASY, servings: 4, calories: 1400"
@@ -78,7 +78,7 @@ const router = express.Router();
  *                 id: 12
  *                 title: "Awesome Spaghetti"
  *                 tags: ["European", "Main Course"]
- *                 coverPhotoUrl: "/recipe-images/1744534349712-m3g0qtykb.jpg"
+ *                 coverPhotoUrl: "SERVERURL/recipe-images/1744534349712-m3g0qtykb.jpg"
  *       200:
  *         description: Recipe updated successfully
  *       400:
@@ -90,7 +90,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.post('/create', logFields, uploadRecipeImages, createRecipe);
+router.post('/create', uploadRecipeImages, createRecipe);
 
 /**
  * @swagger

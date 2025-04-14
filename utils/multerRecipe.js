@@ -18,12 +18,6 @@ const recipeStorage = multer.diskStorage({
     }
 });
 
-const logFields = (req, res, next) => {
-    console.log('Incoming fields:', req.body);
-    console.log('Incoming files:', req.files); 
-    next();
-};
-
 const uploadRecipeImages = multer({
     storage: recipeStorage,
     limits: { fileSize: 5 * 1024 * 1024 },
@@ -32,7 +26,4 @@ const uploadRecipeImages = multer({
     { name: 'images[]', maxCount: 10 }
 ]);
 
-module.exports = { 
-    uploadRecipeImages, 
-    logFields  
-};
+module.exports = { uploadRecipeImages };
