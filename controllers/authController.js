@@ -12,6 +12,7 @@ if (!admin.apps.length) {
     });
 }
 
+// Function to generate access and refresh tokens
 const generateTokens = (userId) => {
     const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
     const refreshToken = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY });
@@ -19,6 +20,7 @@ const generateTokens = (userId) => {
     return { accessToken, refreshToken };
 };
 
+// Function to register a new user
 const register = async (req, res) => {
     try {
         const { name, email, password, preferences, deviceId } = req.body;
@@ -83,7 +85,7 @@ const register = async (req, res) => {
     }
 };
 
-
+// Function to login a user
 const login = async (req, res) => {
     try {
         const { email, password, deviceId, firebaseToken } = req.body;
@@ -133,7 +135,7 @@ const login = async (req, res) => {
     }
 };
 
-
+// Function to download profile picture from OAuth provider
 const downloadProfilePicture = async (imageUrl, userId) => {
     try {
         const profileDir = path.join(__dirname, "../profile_pictures");
@@ -157,6 +159,7 @@ const downloadProfilePicture = async (imageUrl, userId) => {
     }
 };
 
+// Function to handle OAuth login
 const oauthLogin = async (req, res) => {
     try {
         const { idToken, deviceId, firebaseToken, provider } = req.body;

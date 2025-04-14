@@ -1,6 +1,7 @@
 const { prisma } = require('../db');
 const bcrypt = require('bcrypt');
 
+// Function to get user data for account settings
 const getUserData = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
@@ -31,6 +32,7 @@ const getUserData = async (req, res) => {
     }
 };
 
+// Function to update user data
 const updateUser = async (req, res) => {
     const { name, profilePicture, mode, preferences } = req.body;
     const userId = req.user.id; 
@@ -65,7 +67,7 @@ const updateUser = async (req, res) => {
     }
 };
 
-
+// Function to change user password
 const changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const user = req.user;
@@ -100,7 +102,7 @@ const changePassword = async (req, res) => {
     }
 };
 
-
+// Function to delete user account
 const deleteUser = async (req, res) => {
     const userId = req.user.id;
 
@@ -116,7 +118,7 @@ const deleteUser = async (req, res) => {
     }
 };
 
-
+// Function to change user profile picture
 const changePicture = async (req, res) => {
     const userId = req.user.id;
 

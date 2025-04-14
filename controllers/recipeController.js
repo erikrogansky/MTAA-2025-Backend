@@ -1,6 +1,7 @@
 const { format, formatDistanceToNow, differenceInDays } = require('date-fns');
 const { prisma } = require("../db");
 
+// Function to create or update a recipe
 const createRecipe = async (req, res) => {
     try {
         const { recipeId, title, tags, ingredients, instructions, isPublic, description, details, country } = req.body;
@@ -120,6 +121,7 @@ const createRecipe = async (req, res) => {
     }
 };
 
+// Function to get all recipes created by the user
 const getAllOwnRecipes = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -180,6 +182,7 @@ const getAllOwnRecipes = async (req, res) => {
     }
 };
 
+// Function to get all public recipes
 const getPublicRecipes = async (req, res) => {
     try {
         const recipes = await prisma.recipe.findMany({
@@ -239,7 +242,7 @@ const getPublicRecipes = async (req, res) => {
     }
 };
 
-
+// Function to extract details from the recipe details string
 const extractDetails = (details) => {
     let prepTime = null;
     let difficulty = null;
@@ -269,6 +272,7 @@ const extractDetails = (details) => {
     return { prepTime, difficulty, servings, calories };
 };
 
+// Function to get a complete recipe by ID
 const getRecipeById = async (req, res) => {
     try {
         const recipeId = parseInt(req.params.id, 10);
@@ -355,6 +359,7 @@ const getRecipeById = async (req, res) => {
     }
 };
 
+// Function to get a relative date string
 function getRelativeDate(createdAt) {
     const daysDiff = differenceInDays(new Date(), createdAt);
   
@@ -365,6 +370,7 @@ function getRelativeDate(createdAt) {
     return format(createdAt, 'MM/dd/yyyy');
   }
 
+// Function to parse ingredients string into an array of objects
 const parseIngredients = (ingredientsStr) => {
     const ingredientsList = ingredientsStr.split(',');
     const ingredients = [];
@@ -384,6 +390,7 @@ const parseIngredients = (ingredientsStr) => {
     return ingredients;
 };
 
+// Function to add a review to a recipe
 const addReview = async (req, res) => {
     try {
         const { recipeId, rating, comment } = req.body;

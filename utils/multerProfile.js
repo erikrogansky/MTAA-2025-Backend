@@ -1,3 +1,4 @@
+// Multer that saves profile pictures to a specific directory
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');

@@ -1,3 +1,7 @@
+// Middleware to authenticate users using JWT tokens and check for blacklisted tokens.
+// It extracts the token from the Authorization header, verifies it, and checks if it has
+// been blacklisted. If valid, it retrieves the user from the database and attaches it to
+// the request object for further processing in the route handlers.
 const jwt = require("jsonwebtoken");
 const { prisma, redis } = require("../db");
 

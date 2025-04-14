@@ -1,3 +1,4 @@
+// This code generates a profile picture with initials based on the user's name and saves it to a file.
 const { createCanvas } = require("canvas");
 const path = require("path");
 const fs = require("fs");

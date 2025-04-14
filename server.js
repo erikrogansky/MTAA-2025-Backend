@@ -4,7 +4,6 @@ const express = require("express");
 const usersRoutes = require("./routes/users");
 const aiRoutes = require("./routes/ai");
 const authRoutes = require("./routes/auth");
-const firebaseRoutes = require("./routes/firebase");
 const tagRoutes = require("./routes/tags");
 const recipeRoutes = require("./routes/recipes");
 const errorHandler = require("./middleware/errorHandler");
@@ -19,17 +18,14 @@ setupSwagger(app);
 app.use(express.json());
 app.use(errorHandler);
 
-app.get("/", (req, res) => {
-    res.json({ message: "Hello, Node.js Server!" });
-});
-
+// Routes are handled via route files in the routes directory
 app.use("/auth", authRoutes);
 app.use("/users", authMiddleware, usersRoutes);
 app.use("/ai", authMiddleware, aiRoutes);
-//app.use("/firebase", firebaseRoutes);
 app.use("/tags", authMiddleware, tagRoutes);
 app.use("/recipes", authMiddleware, recipeRoutes);
 
+// Static serving of images
 app.use("/profile-pictures", express.static(path.join(__dirname, "profile_pictures")));
 app.use("/recipe-images", express.static(path.join(__dirname, "recipe_images")));
 

@@ -1,5 +1,6 @@
 const { prisma } = require("../db");
 
+// Function to get all tags saved in the database
 const getAll = async (req, res) => {
     try {
         const tags = await prisma.tag.findMany({

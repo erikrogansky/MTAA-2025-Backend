@@ -1,8 +1,9 @@
+// This module initializes Firebase Admin SDK and provides a function to send push notifications using Firebase Cloud Messaging (FCM).
 const admin = require("firebase-admin");
 
 if (!admin.apps.length) {
     admin.initializeApp({
-        credential: admin.credential.cert(require("../mtaa-95655-firebase-adminsdk-fbsvc-9aba7815aa.json")),
+        credential: admin.credential.cert(require("../mtaa-95655-43134b63354d.json")),
     });
 }
 

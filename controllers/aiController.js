@@ -5,6 +5,7 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
+// Function to analyze a recipe and return predicted cooking time, difficulty, portions, and calories
 const recipeDetails = async (req, res) => {
     try {
         const recipe = req.body || null;
@@ -110,7 +111,7 @@ const recipeDetails = async (req, res) => {
     }
 };
 
-
+// Function to generate a description of a recipe
 const recipeDescription = async (req, res) => {
     try {
         const recipe = req.body || null;
