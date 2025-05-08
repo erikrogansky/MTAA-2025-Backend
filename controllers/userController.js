@@ -148,4 +148,51 @@ const changePicture = async (req, res) => {
     }
 };
 
-module.exports = { getUserData, updateUser, changePassword, deleteUser, changePicture };
+// Function to create, update or delete a hydration reminder
+const setHydrationReminder = async (req, res) => {
+    const userId = req.user.id;
+    const { timezone, startHour, endHour, interval, remove } = req.body;
+
+    try {
+        const existing = await prisma.hydrationReminder.findUnique({
+            where: { userId },
+        });
+
+        if (remove) {
+            if (existing) {
+                await prisma.hydrationReminder.delete({ where: { userId } });
+            }
+            return res.json({ message: "Hydration reminder deleted" });
+        }
+
+        if (!timezone || startHour == null || endHour == null || interval == null) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        const data = {
+            timezone,
+            startHour,
+            endHour,
+            interval,
+            lastNotifiedAt: null,
+            user: { connect: { id: userId } },
+        };
+
+        if (existing) {
+            await prisma.hydrationReminder.update({
+                where: { userId },
+                data,
+            });
+            res.json({ message: "Hydration reminder updated" });
+        } else {
+            await prisma.hydrationReminder.create({ data });
+            res.json({ message: "Hydration reminder created" });
+        }
+    } catch (error) {
+        console.error("Error managing hydration reminder:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+module.exports = { getUserData, updateUser, changePassword, deleteUser, changePicture, setHydrationReminder };

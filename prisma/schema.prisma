@@ -30,6 +30,8 @@ model User {
 
   recipes      Recipe[]
   reviews RecipeRating[]
+
+  HydrationReminder HydrationReminder[]
 }
 
 model OAuthAccount {
@@ -115,4 +117,17 @@ model RecipeRating {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+model HydrationReminder {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timezone   String
+  startHour  Int
+  endHour    Int
+  interval   Int
+  lastNotifiedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

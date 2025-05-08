@@ -1,5 +1,5 @@
 const express = require('express');
-const { getUserData, updateUser, changePassword, deleteUser, changePicture } = require('../controllers/userController');
+const { getUserData, updateUser, changePassword, deleteUser, changePicture, setHydrationReminder } = require('../controllers/userController');
 const { upload } = require('../utils/multerProfile');
 
 const router = express.Router();
@@ -177,5 +177,7 @@ router.delete('/delete', deleteUser);
  *         description: Internal server error
  */
 router.post('/change-picture', upload.single('file'), changePicture);
+
+router.post('/set-hydration-reminder', setHydrationReminder);
 
 module.exports = router;
