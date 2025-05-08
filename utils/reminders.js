@@ -1,4 +1,4 @@
-const { utcToZonedTime } = require("date-fns-tz");
+const { toZonedTime } = require("date-fns-tz");
 const { prisma } = require('../db');
 const { sendPushNotification } = require("../utils/firebaseHelper");
 const cron = require('node-cron');
@@ -17,7 +17,7 @@ async function sendHydrationReminders() {
   });
 
   for (const reminder of reminders) {
-    const localTime = utcToZonedTime(now, reminder.timezone);
+    const localTime = toZonedTime(now, reminder.timezone);
     const hour = localTime.getHours();
 
     if (hour >= reminder.startHour && hour <= reminder.endHour) {
