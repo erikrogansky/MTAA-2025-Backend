@@ -44,7 +44,13 @@ async function sendHydrationReminders() {
   }
 }
 
-cron.schedule('*/5 * * * *', () => {
-  console.log("Running hydration reminder job...");
-  sendHydrationReminders().catch(console.error);
-});
+
+
+function startHydrationCron() {
+    cron.schedule('*/5 * * * *', () => {
+        console.log("Running hydration reminder job...");
+        sendHydrationReminders().catch(console.error);
+    });
+}
+  
+module.exports = { startHydrationCron };

@@ -10,6 +10,7 @@ const errorHandler = require("./middleware/errorHandler");
 const authMiddleware = require("./middleware/authMiddleware");
 const { initializeWebSocket } = require("./socket");
 const setupSwagger = require('./swagger');
+const { startHydrationCron } = require("./utils/reminders");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -34,5 +35,6 @@ const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
+startHydrationCron();
 
 initializeWebSocket(server);
