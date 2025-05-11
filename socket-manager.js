@@ -6,7 +6,7 @@ function handleMessage(userId, message, ws) {
 
         switch (data.type) {
             case "subscribe_recipe":
-                const recipeId = data.recipeId;
+                const recipeId = String(data.recipeId);
                 if (!recipeSubscriptions.has(recipeId)) {
                     recipeSubscriptions.set(recipeId, new Set());
                 }
@@ -45,7 +45,7 @@ function notifyRecipeUpdate(recipeId) {
     for (const [id, sockets] of recipeSubscriptions.entries()) {
         console.log(`• Recipe ${id} → ${sockets.size} subscriber(s)`);
     }
-    const subscribers = recipeSubscriptions.get(recipeId);
+    const subscribers = recipeSubscriptions.get(String(recipeId));
     if (!subscribers) {
         console.log(`No subscribers for recipe ${recipeId}`);
         return;
