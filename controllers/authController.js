@@ -128,7 +128,7 @@ const login = async (req, res) => {
             create: { userId: user.id, deviceId, refreshToken, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
         });
 
-        res.json({ accessToken, refreshToken, mode: user.mode });
+        res.json({ accessToken, refreshToken, darkMode: user.darkMode });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
