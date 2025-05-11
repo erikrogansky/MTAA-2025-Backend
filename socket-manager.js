@@ -20,9 +20,9 @@ function handleMessage(userId, message, ws) {
 
             default:
                 console.log(`Received unknown message type from user ${userId}`);
-
-            console.log("Subscribed to recipe:", recipeSubscriptions);
         }
+        
+        console.log("Subscribed to recipe:", recipeSubscriptions);
     } catch (err) {
         console.error("Error processing message:", err);
         ws.send(JSON.stringify({ error: "Invalid message format" }));
