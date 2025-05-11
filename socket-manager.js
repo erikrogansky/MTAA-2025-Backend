@@ -21,8 +21,6 @@ function handleMessage(userId, message, ws) {
             default:
                 console.log(`Received unknown message type from user ${userId}`);
         }
-        
-        console.log("Subscribed to recipe:", recipeSubscriptions);
     } catch (err) {
         console.error("Error processing message:", err);
         ws.send(JSON.stringify({ error: "Invalid message format" }));
@@ -42,7 +40,13 @@ function sendMessageToUser(userId, message) {
 }
 
 function notifyRecipeUpdate(recipeId) {
+    console.log(`Notifying subscribers of recipe ${recipeId}`);
+    console.log(`Subscribers: ${recipeSubscriptions}`);
     const subscribers = recipeSubscriptions.get(recipeId);
+    if (!subscribers) {
+        console.log(`No subscribers for recipe ${recipeId}`);
+        return;
+    }
     if (subscribers) {
         console.log(`Notifying subscribers of recipe ${recipeId}`);
         for (const ws of subscribers) {
