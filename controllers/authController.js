@@ -231,7 +231,7 @@ const oauthLogin = async (req, res) => {
             create: { userId: user.id, deviceId, refreshToken, expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
         });
 
-        res.json({ accessToken, refreshToken });
+        res.json({ accessToken, refreshToken, darkMode: user.darkMode });
     } catch (error) {
         console.error("OAuth Login Error:", error);
         res.status(500).json({ message: "Internal server error" });
