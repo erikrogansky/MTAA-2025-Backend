@@ -407,7 +407,7 @@ const addReview = async (req, res) => {
             },
         });
 
-        notifyRecipeUpdate(parsedRecipeId);
+        notifyRecipeUpdate(recipeId);
 
         res.status(201).json({ message: 'Review added successfully' });
     } catch (error) {
