@@ -1,5 +1,5 @@
 const { format, formatDistanceToNow, differenceInDays } = require('date-fns');
-const { notifyRecipeUpdate } = require("../websockets/socket-manager"); // or wherever it's exported
+const { notifyRecipeUpdate } = require("../socket-manager");
 const { prisma } = require("../db");
 
 // Function to create or update a recipe
