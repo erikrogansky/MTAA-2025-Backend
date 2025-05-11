@@ -44,6 +44,7 @@ function sendMessageToUser(userId, message) {
 function notifyRecipeUpdate(recipeId) {
     const subscribers = recipeSubscriptions.get(recipeId);
     if (subscribers) {
+        console.log(`Notifying subscribers of recipe ${recipeId}`);
         for (const ws of subscribers) {
             ws.send(JSON.stringify({
                 type: "recipe_update",
