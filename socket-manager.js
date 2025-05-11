@@ -41,14 +41,13 @@ function sendMessageToUser(userId, message) {
     }
 }
 
-function notifyRecipeUpdate(recipeId, payload) {
+function notifyRecipeUpdate(recipeId) {
     const subscribers = recipeSubscriptions.get(recipeId);
     if (subscribers) {
         for (const ws of subscribers) {
             ws.send(JSON.stringify({
                 type: "recipe_update",
                 recipeId,
-                ...payload
             }));
         }
     }

@@ -1,4 +1,5 @@
 const { format, formatDistanceToNow, differenceInDays } = require('date-fns');
+const { notifyRecipeUpdate } = require("../websockets/socket-manager"); // or wherever it's exported
 const { prisma } = require("../db");
 
 // Function to create or update a recipe
@@ -78,6 +79,8 @@ const createRecipe = async (req, res) => {
                     })),
                 });
             }
+
+            notifyRecipeUpdate(parsedRecipeId);
 
             res.status(200).json({
                 message: 'Recipe updated successfully',
@@ -403,6 +406,8 @@ const addReview = async (req, res) => {
                 text: comment,
             },
         });
+
+        notifyRecipeUpdate(parsedRecipeId);
 
         res.status(201).json({ message: 'Review added successfully' });
     } catch (error) {
