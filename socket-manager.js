@@ -11,17 +11,17 @@ function handleMessage(userId, message, ws) {
                     recipeSubscriptions.set(recipeId, new Set());
                 }
                 recipeSubscriptions.get(recipeId).add(ws);
-                console.log(`User ${userId} subscribed to recipe ${recipeId}`);
                 break;
 
             case "unsubscribe_recipe":
                 const unsubId = data.recipeId;
                 recipeSubscriptions.get(unsubId)?.delete(ws);
-                console.log(`User ${userId} unsubscribed from recipe ${unsubId}`);
                 break;
 
             default:
                 console.log(`Received unknown message type from user ${userId}`);
+
+            console.log("Subscribed to recipe:", recipeSubscriptions);
         }
     } catch (err) {
         console.error("Error processing message:", err);
