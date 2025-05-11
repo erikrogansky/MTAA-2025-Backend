@@ -1,10 +1,23 @@
+const recipeSubscriptions = new Map(); 
+
 function handleMessage(userId, message, ws) {
     try {
         const data = JSON.parse(message);
 
         switch (data.type) {
-            case "chat":
-                console.log(`User ${userId} sent a chat message: ${data.content}`);
+            case "subscribe_recipe":
+                const recipeId = data.recipeId;
+                if (!recipeSubscriptions.has(recipeId)) {
+                    recipeSubscriptions.set(recipeId, new Set());
+                }
+                recipeSubscriptions.get(recipeId).add(ws);
+                console.log(`User ${userId} subscribed to recipe ${recipeId}`);
+                break;
+
+            case "unsubscribe_recipe":
+                const unsubId = data.recipeId;
+                recipeSubscriptions.get(unsubId)?.delete(ws);
+                console.log(`User ${userId} unsubscribed from recipe ${unsubId}`);
                 break;
 
             default:
@@ -28,4 +41,17 @@ function sendMessageToUser(userId, message) {
     }
 }
 
-module.exports = { handleMessage, sendMessageToUser };
+function notifyRecipeUpdate(recipeId, payload) {
+    const subscribers = recipeSubscriptions.get(recipeId);
+    if (subscribers) {
+        for (const ws of subscribers) {
+            ws.send(JSON.stringify({
+                type: "recipe_update",
+                recipeId,
+                ...payload
+            }));
+        }
+    }
+}
+
+module.exports = { handleMessage, sendMessageToUser, notifyRecipeUpdate };
