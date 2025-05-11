@@ -41,7 +41,10 @@ function sendMessageToUser(userId, message) {
 
 function notifyRecipeUpdate(recipeId) {
     console.log(`Notifying subscribers of recipe ${recipeId}`);
-    console.log(`Subscribers: ${recipeSubscriptions}`);
+    console.log("Subscribers for ALL recipes:");
+    for (const [id, sockets] of recipeSubscriptions.entries()) {
+        console.log(`• Recipe ${id} → ${sockets.size} subscriber(s)`);
+    }
     const subscribers = recipeSubscriptions.get(recipeId);
     if (!subscribers) {
         console.log(`No subscribers for recipe ${recipeId}`);
